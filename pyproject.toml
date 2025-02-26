@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sirc"
+version = "0.1.0"
+dependencies = []
+requires-python = ">=3.12"
+authors = [{name = "CRISvsGAME", email = "cris@crisvsgame.com"}]
+maintainers = [{name = "CRISvsGAME", email = "cris@crisvsgame.com"}]
+description = "SIRC - Digital Logic and Circuit Simulation Engine"
+readme = "README.md"
+license = "MIT"
+keywords = ["digital logic", "circuit simulation", "simulation engine"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+dev = ["mypy", "pylint", "pytest"]
+
+[project.urls]
+Repository = "https://github.com/CRISvsGAME/sirc.git"
+
+[tool.pylint]
+ignore-patterns = [".*\\.pyi"]

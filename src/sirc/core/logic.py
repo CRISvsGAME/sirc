@@ -26,3 +26,27 @@ class LogicValue(Enum):
     ONE = "1"
     X = "X"
     Z = "Z"
+
+    # --------------------------------------------------------------------------
+    # Helper Properties
+    # --------------------------------------------------------------------------
+
+    @property
+    def is_zero(self) -> bool:
+        """Return True if this value is ZERO."""
+        return self is LogicValue.ZERO
+
+    @property
+    def is_one(self) -> bool:
+        """Return True if this value is ONE."""
+        return self is LogicValue.ONE
+
+    @property
+    def is_x(self) -> bool:
+        """Return True if this value is unknown (X)."""
+        return self is LogicValue.X
+
+    @property
+    def is_z(self) -> bool:
+        """Return True if this value is high-impedance (Z)."""
+        return self is LogicValue.Z

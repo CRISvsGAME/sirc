@@ -50,3 +50,49 @@ class LogicValue(Enum):
     def is_z(self) -> bool:
         """Return True if this value is high-impedance (Z)."""
         return self is LogicValue.Z
+
+    # --------------------------------------------------------------------------
+    # Two-Driver Resolution
+    # --------------------------------------------------------------------------
+
+    def resolve(self, other: LogicValue) -> LogicValue:
+        """
+        Resolve two driver values into a single LogicValue.
+
+        Args:
+            other: The second LogicValue driving the same Node.
+
+        Returns:
+            LogicValue: The resolved value.
+
+        Resolution Table (N = Node):
+             N | 0 | 1 | X | Z
+            ---+---+---+---+---
+             0 | 0 | X | X | 0
+            ---+---+---+---+---
+             1 | X | 1 | X | 1
+            ---+---+---+---+---
+             X | X | X | X | X
+            ---+---+---+---+---
+             Z | 0 | 1 | X | Z
+        """
+        result = self
+
+        if self is not other:
+
+            if self.is_x or other.is_x:
+                result = LogicValue.X
+
+            elif self.is_z and other.is_z:
+                result = LogicValue.Z
+
+            elif (self.is_zero and other.is_one) or (self.is_one and other.is_zero):
+                result = LogicValue.X
+
+            elif self.is_z:
+                result = other
+
+            elif other.is_z:
+                result = self
+
+        return result

@@ -8,6 +8,7 @@ IEEE 1800-2023, but the terminology used here follows SIRC conventions.
 
 from __future__ import annotations
 from enum import Enum, unique
+from typing import Iterable
 
 
 @unique
@@ -94,5 +95,37 @@ class LogicValue(Enum):
 
             elif other.is_z:
                 result = self
+
+        return result
+
+    # --------------------------------------------------------------------------
+    # Multi-Driver Resolution
+    # --------------------------------------------------------------------------
+
+    @staticmethod
+    def resolve_all(values: Iterable[LogicValue]) -> LogicValue:
+        """
+        Resolve multiple driver values into a single LogicValue.
+
+        Args:
+            values: Iterable of LogicValue instances.
+
+        Raises:
+            ValueError: If no values are provided.
+
+        Returns:
+            LogicValue: The resolved value.
+        """
+        iterator = iter(values)
+
+        try:
+            result = next(iterator)
+        except StopIteration as e:
+            raise ValueError("resolve_all() requires at least one LogicValue.") from e
+
+        for value in iterator:
+            result = result.resolve(value)
+            if result.is_x:
+                return LogicValue.X
 
         return result

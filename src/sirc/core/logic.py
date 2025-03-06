@@ -129,3 +129,15 @@ class LogicValue(Enum):
                 return LogicValue.X
 
         return result
+
+    # --------------------------------------------------------------------------
+    # Display Helpers
+    # --------------------------------------------------------------------------
+
+    def __str__(self) -> str:
+        """Return compact string form ('0', '1', 'X', 'Z')."""
+        return self.value
+
+    def __repr__(self) -> str:
+        """Return readable debug representation."""
+        return f"LogicValue.{self.name}"

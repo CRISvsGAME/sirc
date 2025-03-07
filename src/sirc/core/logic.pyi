@@ -1,0 +1,19 @@
+from enum import Enum
+from typing import Iterable
+
+class LogicValue(Enum):
+    ZERO = '0'
+    ONE = '1'
+    X = 'X'
+    Z = 'Z'
+    @property
+    def is_zero(self) -> bool: ...
+    @property
+    def is_one(self) -> bool: ...
+    @property
+    def is_x(self) -> bool: ...
+    @property
+    def is_z(self) -> bool: ...
+    def resolve(self, other: LogicValue) -> LogicValue: ...
+    @staticmethod
+    def resolve_all(values: Iterable[LogicValue]) -> LogicValue: ...

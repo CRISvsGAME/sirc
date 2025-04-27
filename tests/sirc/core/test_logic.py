@@ -65,3 +65,14 @@ def test_two_driver_resolution(a: LogicValue, b: LogicValue, expected: LogicValu
     """Test two-driver resolution of LogicValue."""
     assert a.resolve(b) is expected
     assert b.resolve(a) is expected
+
+
+# ------------------------------------------------------------------------------
+# Multi-Driver Resolution Tests
+# ------------------------------------------------------------------------------
+
+
+def test_resolve_all_empty_raises():
+    """Test that resolving an empty list raises ValueError."""
+    with pytest.raises(ValueError):
+        LogicValue.resolve_all([])

@@ -76,3 +76,9 @@ def test_resolve_all_empty_raises():
     """Test that resolving an empty list raises ValueError."""
     with pytest.raises(ValueError):
         LogicValue.resolve_all([])
+
+
+@pytest.mark.parametrize("value", list(LogicValue))
+def test_resolve_all_single_value(value: LogicValue):
+    """Test that resolving a single value returns that value."""
+    assert LogicValue.resolve_all([value]) is value

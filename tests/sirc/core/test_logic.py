@@ -156,3 +156,10 @@ def test_resolve_all_single_value(value: LogicValue):
 def test_resolve_all_multiple_values(values: list[LogicValue], expected: LogicValue):
     """Test resolving multiple LogicValues."""
     assert LogicValue.resolve_all(values) is expected
+
+
+def test_resolve_all_large_list_no_conflict():
+    """Test resolving a large list with non conflicting LogicValues."""
+    count = 1000000
+    values = [LogicValue.ZERO] * count
+    assert LogicValue.resolve_all(values) is LogicValue.ZERO

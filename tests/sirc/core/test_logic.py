@@ -163,3 +163,10 @@ def test_resolve_all_large_list_no_conflict():
     count = 1000000
     values = [LogicValue.ZERO] * count
     assert LogicValue.resolve_all(values) is LogicValue.ZERO
+
+
+def test_resolve_all_large_list_conflict():
+    """Test resolving a large list with conflicting LogicValues."""
+    count = 1000000
+    values = [LogicValue.ZERO] * count + [LogicValue.ONE] * count
+    assert LogicValue.resolve_all(values) is LogicValue.X

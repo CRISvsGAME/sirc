@@ -170,3 +170,16 @@ def test_resolve_all_large_list_conflict():
     count = 1000000
     values = [LogicValue.ZERO] * count + [LogicValue.ONE] * count
     assert LogicValue.resolve_all(values) is LogicValue.X
+
+
+# -----------------------------------------------------------------------------
+# Display Helpers Tests
+# -----------------------------------------------------------------------------
+
+
+def test_str():
+    """Test the __str__ method of LogicValue."""
+    assert str(LogicValue.ZERO) == "0"
+    assert str(LogicValue.ONE) == "1"
+    assert str(LogicValue.X) == "X"
+    assert str(LogicValue.Z) == "Z"

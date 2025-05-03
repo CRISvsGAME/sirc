@@ -183,3 +183,11 @@ def test_str():
     assert str(LogicValue.ONE) == "1"
     assert str(LogicValue.X) == "X"
     assert str(LogicValue.Z) == "Z"
+
+
+def test_repr():
+    """Test the __repr__ method of LogicValue."""
+    assert repr(LogicValue.ZERO) == "LogicValue.ZERO"
+    assert repr(LogicValue.ONE) == "LogicValue.ONE"
+    assert repr(LogicValue.X) == "LogicValue.X"
+    assert repr(LogicValue.Z) == "LogicValue.Z"

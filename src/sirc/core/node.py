@@ -26,3 +26,21 @@ class Node:
         self._drivers: list[LogicValue] = []
         self._connections: set[Node] = set()
         self._value: LogicValue = LogicValue.Z
+
+    # --------------------------------------------------------------------------
+    # Value Handling (Simulator-Controlled)
+    # --------------------------------------------------------------------------
+
+    def set_resolved_value(self, value: LogicValue) -> None:
+        """
+        Set the resolved LogicValue of this Node.
+
+        Args:
+            value: The resolved LogicValue to set.
+        """
+        self._value = value
+
+    @property
+    def value(self) -> LogicValue:
+        """Return the current resolved LogicValue of this Node."""
+        return self._value

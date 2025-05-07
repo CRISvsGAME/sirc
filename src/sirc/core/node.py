@@ -44,3 +44,24 @@ class Node:
     def value(self) -> LogicValue:
         """Return the current resolved LogicValue of this Node."""
         return self._value
+
+    # --------------------------------------------------------------------------
+    # Driver Management
+    # --------------------------------------------------------------------------
+
+    def add_driver(self, value: LogicValue) -> None:
+        """
+        Add a driver LogicValue to this Node.
+
+        Args:
+            value: The LogicValue driving this Node.
+        """
+        self._drivers.append(value)
+
+    def clear_drivers(self) -> None:
+        """Remove all driver LogicValues from this Node."""
+        self._drivers.clear()
+
+    def get_drivers(self) -> tuple[LogicValue, ...]:
+        """Return all driver LogicValues as an immutable tuple."""
+        return tuple(self._drivers)

@@ -65,3 +65,45 @@ class Node:
     def get_drivers(self) -> tuple[LogicValue, ...]:
         """Return all driver LogicValues as an immutable tuple."""
         return tuple(self._drivers)
+
+    # --------------------------------------------------------------------------
+    # Connectivity
+    # --------------------------------------------------------------------------
+
+    def add_connection(self, other: Node) -> None:
+        """INTERNAL USE ONLY: Add a direct connection to another Node."""
+        self._connections.add(other)
+
+    def remove_connection(self, other: Node) -> None:
+        """INTERNAL USE ONLY: Remove a direct connection to another Node."""
+        self._connections.discard(other)
+
+    def connect(self, other: Node) -> None:
+        """
+        Create a bidirectional connection between this Node and another.
+
+        Args:
+            other: The Node to connect to.
+        """
+        if self is other:
+            return
+
+        self.add_connection(other)
+        other.add_connection(self)
+
+    def disconnect(self, other: Node) -> None:
+        """
+        Remove the bidirectional connection between this Node and another.
+
+        Args:
+            other: The Node to disconnect from.
+        """
+        if self is other:
+            return
+
+        self.remove_connection(other)
+        other.remove_connection(self)
+
+    def get_connections(self) -> tuple[Node, ...]:
+        """Return all directly connected Nodes as an immutable tuple."""
+        return tuple(self._connections)

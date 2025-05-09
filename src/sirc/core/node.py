@@ -107,3 +107,11 @@ class Node:
     def get_connections(self) -> tuple[Node, ...]:
         """Return all directly connected Nodes as an immutable tuple."""
         return tuple(self._connections)
+
+    # --------------------------------------------------------------------------
+    # Debug Representation
+    # --------------------------------------------------------------------------
+
+    def __repr__(self) -> str:
+        """Return a debug representation of this Node."""
+        return f"<Node value={self._value!r} drivers={tuple(self._drivers)!r}>"

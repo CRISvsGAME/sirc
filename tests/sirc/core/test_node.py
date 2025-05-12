@@ -14,3 +14,11 @@ def test_node_initial_state():
     assert n.value is LogicValue.Z
     assert not n.get_drivers()
     assert not n.get_connections()
+
+
+def test_nodes_are_distinct():
+    """Different Nodes must be distinct instances."""
+    a = Node()
+    b = Node()
+    assert a is not b
+    assert a != b

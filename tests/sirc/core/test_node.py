@@ -22,3 +22,21 @@ def test_nodes_are_distinct():
     b = Node()
     assert a is not b
     assert a != b
+
+
+# ------------------------------------------------------------------------------
+# Value Handling Tests
+# ------------------------------------------------------------------------------
+
+
+def test_set_resolved_value():
+    """Setting resolved value must update the Node's stored value."""
+    n = Node()
+    n.set_resolved_value(LogicValue.ZERO)
+    assert n.value is LogicValue.ZERO
+    n.set_resolved_value(LogicValue.ONE)
+    assert n.value is LogicValue.ONE
+    n.set_resolved_value(LogicValue.Z)
+    assert n.value is LogicValue.Z
+    n.set_resolved_value(LogicValue.X)
+    assert n.value is LogicValue.X

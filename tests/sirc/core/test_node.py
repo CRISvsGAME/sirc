@@ -40,3 +40,23 @@ def test_set_resolved_value():
     assert n.value is LogicValue.Z
     n.set_resolved_value(LogicValue.X)
     assert n.value is LogicValue.X
+
+
+# ------------------------------------------------------------------------------
+# Driver Management Tests
+# ------------------------------------------------------------------------------
+
+
+def test_add_driver():
+    """add_driver() must append drivers in order."""
+    n = Node()
+    n.add_driver(LogicValue.ZERO)
+    n.add_driver(LogicValue.ONE)
+    n.add_driver(LogicValue.X)
+    n.add_driver(LogicValue.Z)
+    assert n.get_drivers() == (
+        LogicValue.ZERO,
+        LogicValue.ONE,
+        LogicValue.X,
+        LogicValue.Z,
+    )

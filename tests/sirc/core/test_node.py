@@ -60,3 +60,12 @@ def test_add_driver():
         LogicValue.X,
         LogicValue.Z,
     )
+
+
+def test_add_many_drivers():
+    """add_driver() must handle many drivers."""
+    count = 1000000
+    n = Node()
+    for _ in range(count):
+        n.add_driver(LogicValue.ZERO)
+    assert len(n.get_drivers()) == count

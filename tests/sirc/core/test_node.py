@@ -69,3 +69,14 @@ def test_add_many_drivers():
     for _ in range(count):
         n.add_driver(LogicValue.ZERO)
     assert len(n.get_drivers()) == count
+
+
+def test_clear_drivers():
+    """clear_drivers() must remove all drivers."""
+    n = Node()
+    n.add_driver(LogicValue.ZERO)
+    n.add_driver(LogicValue.ONE)
+    n.add_driver(LogicValue.X)
+    n.add_driver(LogicValue.Z)
+    n.clear_drivers()
+    assert not n.get_drivers()

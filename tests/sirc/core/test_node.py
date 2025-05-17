@@ -80,3 +80,15 @@ def test_clear_drivers():
     n.add_driver(LogicValue.Z)
     n.clear_drivers()
     assert not n.get_drivers()
+
+
+def test_get_drivers():
+    """get_drivers() must return an immutable tuple copy."""
+    n = Node()
+    n.add_driver(LogicValue.ZERO)
+    n.add_driver(LogicValue.ONE)
+    n.add_driver(LogicValue.X)
+    n.add_driver(LogicValue.Z)
+    drivers = n.get_drivers()
+    assert isinstance(drivers, tuple)
+    assert drivers == (LogicValue.ZERO, LogicValue.ONE, LogicValue.X, LogicValue.Z)

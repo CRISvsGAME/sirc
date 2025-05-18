@@ -92,3 +92,19 @@ def test_get_drivers():
     drivers = n.get_drivers()
     assert isinstance(drivers, tuple)
     assert drivers == (LogicValue.ZERO, LogicValue.ONE, LogicValue.X, LogicValue.Z)
+
+
+# ------------------------------------------------------------------------------
+# Connectivity Tests
+# ------------------------------------------------------------------------------
+
+
+def test_connect_bidirectional():
+    """connect() must create symmetric connections."""
+    a = Node()
+    b = Node()
+    a.connect(b)
+    assert a in b.get_connections()
+    assert b in a.get_connections()
+    assert len(a.get_connections()) == 1
+    assert len(b.get_connections()) == 1

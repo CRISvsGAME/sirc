@@ -108,3 +108,13 @@ def test_connect_bidirectional():
     assert b in a.get_connections()
     assert len(a.get_connections()) == 1
     assert len(b.get_connections()) == 1
+
+
+def test_connect_no_duplicates():
+    """connect() must not create duplicate connections."""
+    a = Node()
+    b = Node()
+    a.connect(b)
+    b.connect(a)
+    assert a.get_connections() == (b,)
+    assert b.get_connections() == (a,)

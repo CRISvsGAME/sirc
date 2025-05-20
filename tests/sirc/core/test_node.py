@@ -118,3 +118,10 @@ def test_connect_no_duplicates():
     b.connect(a)
     assert a.get_connections() == (b,)
     assert b.get_connections() == (a,)
+
+
+def test_connect_self_noop():
+    """Connecting a Node to itself must do nothing."""
+    n = Node()
+    n.connect(n)
+    assert not n.get_connections()

@@ -125,3 +125,13 @@ def test_connect_self_noop():
     n = Node()
     n.connect(n)
     assert not n.get_connections()
+
+
+def test_disconnect_bidirectional():
+    """disconnect() must remove symmetric connections."""
+    a = Node()
+    b = Node()
+    a.connect(b)
+    b.disconnect(a)
+    assert not a.get_connections()
+    assert not b.get_connections()

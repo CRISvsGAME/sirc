@@ -135,3 +135,10 @@ def test_disconnect_bidirectional():
     b.disconnect(a)
     assert not a.get_connections()
     assert not b.get_connections()
+
+
+def test_disconnect_self_noop():
+    """Disconnecting a Node from itself must do nothing."""
+    n = Node()
+    n.disconnect(n)
+    assert not n.get_connections()

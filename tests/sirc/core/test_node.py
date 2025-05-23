@@ -142,3 +142,14 @@ def test_disconnect_self_noop():
     n = Node()
     n.disconnect(n)
     assert not n.get_connections()
+
+
+def test_add_connection_internal_only():
+    """add_connection() must add a one-way connection."""
+    a = Node()
+    b = Node()
+    a.add_connection(b)
+    assert b in a.get_connections()
+    assert a not in b.get_connections()
+    assert len(a.get_connections()) == 1
+    assert len(b.get_connections()) == 0

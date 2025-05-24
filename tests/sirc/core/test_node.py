@@ -153,3 +153,13 @@ def test_add_connection_internal_only():
     assert a not in b.get_connections()
     assert len(a.get_connections()) == 1
     assert len(b.get_connections()) == 0
+
+
+def test_remove_connection_internal_only():
+    """remove_connection() must remove a one-way connection."""
+    a = Node()
+    b = Node()
+    a.add_connection(b)
+    a.remove_connection(b)
+    assert not a.get_connections()
+    assert not b.get_connections()

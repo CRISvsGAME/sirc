@@ -163,3 +163,13 @@ def test_remove_connection_internal_only():
     a.remove_connection(b)
     assert not a.get_connections()
     assert not b.get_connections()
+
+
+def test_get_connections():
+    """get_connections() must return an immutable tuple copy."""
+    a = Node()
+    b = Node()
+    a.connect(b)
+    connections = a.get_connections()
+    assert isinstance(connections, tuple)
+    assert connections == (b,)

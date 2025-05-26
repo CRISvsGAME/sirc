@@ -173,3 +173,14 @@ def test_get_connections():
     connections = a.get_connections()
     assert isinstance(connections, tuple)
     assert connections == (b,)
+
+
+def test_isolated_node_connections():
+    """An isolated Node must have no connections."""
+    a = Node()
+    b = Node()
+    c = Node()
+    a.connect(b)
+    assert c not in a.get_connections()
+    assert c not in b.get_connections()
+    assert not c.get_connections()

@@ -184,3 +184,18 @@ def test_isolated_node_connections():
     assert c not in a.get_connections()
     assert c not in b.get_connections()
     assert not c.get_connections()
+
+
+# ------------------------------------------------------------------------------
+# Debug Representation Tests
+# ------------------------------------------------------------------------------
+
+
+def test_repr_contains_value_and_drivers():
+    """__repr__ must include value and drivers"""
+    n = Node()
+    n.add_driver(LogicValue.ONE)
+    r = repr(n)
+    assert "Node" in r
+    assert "value=LogicValue.Z" in r
+    assert "drivers=(LogicValue.ONE,)" in r

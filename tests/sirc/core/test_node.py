@@ -199,3 +199,12 @@ def test_repr_contains_value_and_drivers():
     assert "Node" in r
     assert "value=LogicValue.Z" in r
     assert "drivers=(LogicValue.ONE,)" in r
+
+
+def test_repr_format():
+    """__repr__ must have correct format."""
+    n = Node()
+    n.add_driver(LogicValue.ONE)
+    r = repr(n)
+    assert r.startswith("<Node ")
+    assert r.endswith(">")

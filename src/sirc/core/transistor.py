@@ -38,3 +38,15 @@ class Transistor:
     gate: Node
     source: Node
     drain: Node
+
+    # --------------------------------------------------------------------------
+    # Simulator-Queried Conduction Rule
+    # --------------------------------------------------------------------------
+
+    def is_conducting(self) -> bool:
+        """
+        Return True if the transistor forms a conduction path between source and
+        drain, based on its gate Node's resolved LogicValue. Subclasses (NMOS,
+        PMOS) override this with device-type behaviour.
+        """
+        raise NotImplementedError("Transistor.is_conducting() must be implemented.")

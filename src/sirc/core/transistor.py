@@ -50,3 +50,24 @@ class Transistor:
         PMOS) override this with device-type behaviour.
         """
         raise NotImplementedError("Transistor.is_conducting() must be implemented.")
+
+    # --------------------------------------------------------------------------
+    # Structural Helpers
+    # --------------------------------------------------------------------------
+
+    def terminals(self) -> tuple[Node, Node, Node]:
+        """Return (gate, source, drain) for inspection by the Simulator."""
+        return (self.gate, self.source, self.drain)
+
+    def conduction_nodes(self) -> tuple[Node, Node]:
+        """
+        Return the conduction terminals (source, drain). The Simulator uses this
+        to connect/disconnect nodes dynamically when is_conducting() evaluates
+        True/False.
+        """
+        return (self.source, self.drain)
+
+    def __repr__(self) -> str:
+        """Return debug representation."""
+        name = self.__class__.__name__
+        return f"<{name} gate={self.gate} source={self.source} drain={self.drain}>"

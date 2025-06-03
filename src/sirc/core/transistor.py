@@ -9,6 +9,7 @@ the structure and the Simulator will determine whether a conduction path exists.
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
+from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 
 
@@ -71,3 +72,17 @@ class Transistor:
         """Return debug representation."""
         name = self.__class__.__name__
         return f"<{name} gate={self.gate} source={self.source} drain={self.drain}>"
+
+
+class NMOS(Transistor):
+    """
+    NMOS transistor.
+
+    Conduction Rule:
+        - Conducts when gate is LogicValue.ONE.
+        - Non-conducting for ZERO, X, or Z.
+    """
+
+    def is_conducting(self) -> bool:
+        g = self.gate.value
+        return g is LogicValue.ONE

@@ -86,3 +86,17 @@ class NMOS(Transistor):
     def is_conducting(self) -> bool:
         g = self.gate.value
         return g is LogicValue.ONE
+
+
+class PMOS(Transistor):
+    """
+    PMOS transistor.
+
+    Conduction Rule:
+        - Conducts when gate is LogicValue.ZERO.
+        - Non-conducting for ONE, X, or Z.
+    """
+
+    def is_conducting(self) -> bool:
+        g = self.gate.value
+        return g is LogicValue.ZERO

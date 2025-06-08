@@ -1,5 +1,6 @@
 """Unit tests for sirc.core.transistor module."""
 
+import pytest
 from sirc.core.node import Node
 from sirc.core.transistor import Transistor
 
@@ -27,3 +28,10 @@ def test_transistor_conduction_nodes():
     d = Node()
     t = Transistor(g, s, d)
     assert t.conduction_nodes() == (s, d)
+
+
+def test_transistor_is_conducting_not_implemented():
+    """The base class must raise NotImplementedError."""
+    t = Transistor(Node(), Node(), Node())
+    with pytest.raises(NotImplementedError):
+        t.is_conducting()

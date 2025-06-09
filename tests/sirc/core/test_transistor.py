@@ -35,3 +35,16 @@ def test_transistor_is_conducting_not_implemented():
     t = Transistor(Node(), Node(), Node())
     with pytest.raises(NotImplementedError):
         t.is_conducting()
+
+
+def test_transistor_repr_contains_name_and_nodes():
+    """__repr__ must include class name and terminal nodes."""
+    g = Node()
+    s = Node()
+    d = Node()
+    t = Transistor(g, s, d)
+    r = repr(t)
+    assert "Transistor" in r
+    assert "gate=" in r
+    assert "source=" in r
+    assert "drain=" in r

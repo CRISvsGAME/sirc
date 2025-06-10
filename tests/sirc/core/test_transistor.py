@@ -48,3 +48,14 @@ def test_transistor_repr_contains_name_and_nodes():
     assert "gate=" in r
     assert "source=" in r
     assert "drain=" in r
+
+
+def test_transistor_repr_format():
+    """__repr__ must have correct format."""
+    g = Node()
+    s = Node()
+    d = Node()
+    t = Transistor(g, s, d)
+    r = repr(t)
+    assert r.startswith("<Transistor ")
+    assert r.endswith(">")

@@ -1,8 +1,9 @@
 """Unit tests for sirc.core.transistor module."""
 
 import pytest
+from sirc.core.logic import LogicValue
 from sirc.core.node import Node
-from sirc.core.transistor import Transistor
+from sirc.core.transistor import Transistor, NMOS
 
 # ------------------------------------------------------------------------------
 # Base Class Tests
@@ -59,3 +60,28 @@ def test_transistor_repr_format():
     r = repr(t)
     assert r.startswith("<Transistor ")
     assert r.endswith(">")
+
+
+# ------------------------------------------------------------------------------
+# NMOS Tests
+# ------------------------------------------------------------------------------
+
+
+def test_nmos_conducting_rules():
+    """NMOS must conduct only when gate is LogicValue.ONE."""
+    g = Node()
+    s = Node()
+    d = Node()
+    nmos = NMOS(g, s, d)
+    # Gate = 0 → off
+    g.set_resolved_value(LogicValue.ZERO)
+    assert not nmos.is_conducting()
+    # Gate = 1 → on
+    g.set_resolved_value(LogicValue.ONE)
+    assert nmos.is_conducting()
+    # Gate = X → off
+    g.set_resolved_value(LogicValue.X)
+    assert not nmos.is_conducting()
+    # Gate = Z → off
+    g.set_resolved_value(LogicValue.Z)
+    assert not nmos.is_conducting()

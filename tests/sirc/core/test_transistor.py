@@ -85,3 +85,16 @@ def test_nmos_conducting_rules():
     # Gate = Z → off
     g.set_resolved_value(LogicValue.Z)
     assert not nmos.is_conducting()
+
+
+def test_nmos_repr():
+    """NMOS __repr__ must include device type."""
+    g = Node()
+    s = Node()
+    d = Node()
+    nmos = NMOS(g, s, d)
+    r = repr(nmos)
+    assert "NMOS" in r
+    assert "gate=" in r
+    assert "source=" in r
+    assert "drain=" in r

@@ -3,7 +3,7 @@
 import pytest
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
-from sirc.core.transistor import Transistor, NMOS
+from sirc.core.transistor import Transistor, NMOS, PMOS
 
 # ------------------------------------------------------------------------------
 # Base Class Tests
@@ -98,3 +98,28 @@ def test_nmos_repr():
     assert "gate=" in r
     assert "source=" in r
     assert "drain=" in r
+
+
+# ------------------------------------------------------------------------------
+# PMOS Tests
+# ------------------------------------------------------------------------------
+
+
+def test_pmos_conducting_rules():
+    """PMOS must conduct only when gate is LogicValue.ZERO."""
+    g = Node()
+    s = Node()
+    d = Node()
+    pmos = PMOS(g, s, d)
+    # Gate = 0 → on
+    g.set_resolved_value(LogicValue.ZERO)
+    assert pmos.is_conducting()
+    # Gate = 1 → off
+    g.set_resolved_value(LogicValue.ONE)
+    assert not pmos.is_conducting()
+    # Gate = X → off
+    g.set_resolved_value(LogicValue.X)
+    assert not pmos.is_conducting()
+    # Gate = Z → off
+    g.set_resolved_value(LogicValue.Z)
+    assert not pmos.is_conducting()

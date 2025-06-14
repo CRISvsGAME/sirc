@@ -123,3 +123,16 @@ def test_pmos_conducting_rules():
     # Gate = Z → off
     g.set_resolved_value(LogicValue.Z)
     assert not pmos.is_conducting()
+
+
+def test_pmos_repr():
+    """PMOS __repr__ must include device type."""
+    g = Node()
+    s = Node()
+    d = Node()
+    pmos = PMOS(g, s, d)
+    r = repr(pmos)
+    assert "PMOS" in r
+    assert "gate=" in r
+    assert "source=" in r
+    assert "drain=" in r

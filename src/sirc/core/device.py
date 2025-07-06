@@ -28,3 +28,17 @@ class LogicDevice(ABC):
         """Create a new LogicDevice with a terminal Node and default Z value."""
         self._node = Node()
         self._value = LogicValue.Z
+
+    # --------------------------------------------------------------------------
+    # Properties
+    # --------------------------------------------------------------------------
+
+    @property
+    def terminal(self) -> Node:
+        """Return the terminal Node of this LogicDevice."""
+        return self._node
+
+    @property
+    def value(self) -> LogicValue:
+        """Return the LogicValue driven by this LogicDevice."""
+        return self._value

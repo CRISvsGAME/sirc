@@ -42,3 +42,12 @@ class LogicDevice(ABC):
     def value(self) -> LogicValue:
         """Return the LogicValue driven by this LogicDevice."""
         return self._value
+
+    # --------------------------------------------------------------------------
+    # Debug Representation
+    # --------------------------------------------------------------------------
+
+    def __repr__(self) -> str:
+        """Return a debug representation of this LogicDevice."""
+        cls = self.__class__.__name__
+        return f"<{cls} value={self.value!r} terminal={self.terminal!r}>"

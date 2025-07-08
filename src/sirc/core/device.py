@@ -51,3 +51,20 @@ class LogicDevice(ABC):
         """Return a debug representation of this LogicDevice."""
         cls = self.__class__.__name__
         return f"<{cls} value={self.value!r} terminal={self.terminal!r}>"
+
+
+# ------------------------------------------------------------------------------
+# Power Rail
+# ------------------------------------------------------------------------------
+
+
+class VDD(LogicDevice):
+    """
+    Logic "1" power rail device.
+
+    This device permanently drives its terminal Node with LogicValue.ONE.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._value = LogicValue.ONE

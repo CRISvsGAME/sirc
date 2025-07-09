@@ -68,3 +68,20 @@ class VDD(LogicDevice):
     def __init__(self) -> None:
         super().__init__()
         self._value = LogicValue.ONE
+
+
+# ------------------------------------------------------------------------------
+# Ground Rail
+# ------------------------------------------------------------------------------
+
+
+class GND(LogicDevice):
+    """
+    Logic "0" ground rail device.
+
+    This device permanently drives its terminal Node with LogicValue.ZERO.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._value = LogicValue.ZERO

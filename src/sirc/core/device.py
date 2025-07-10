@@ -85,3 +85,20 @@ class GND(LogicDevice):
     def __init__(self) -> None:
         super().__init__()
         self._value = LogicValue.ZERO
+
+
+# ------------------------------------------------------------------------------
+# Input Device
+# ------------------------------------------------------------------------------
+
+
+class Input(LogicDevice):
+    """
+    Logic signal input device.
+
+    This device allows external setting of its driven LogicValue.
+    """
+
+    def set_value(self, value: LogicValue) -> None:
+        """Set the LogicValue driven by this Input device."""
+        self._value = value

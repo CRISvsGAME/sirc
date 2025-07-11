@@ -102,3 +102,20 @@ class Input(LogicDevice):
     def set_value(self, value: LogicValue) -> None:
         """Set the LogicValue driven by this Input device."""
         self._value = value
+
+
+# ------------------------------------------------------------------------------
+# Probe Device
+# ------------------------------------------------------------------------------
+
+
+class Probe(LogicDevice):
+    """
+    Logic signal probe device.
+
+    This device allows sampling of the LogicValue present on its terminal Node.
+    """
+
+    def sample(self) -> LogicValue:
+        """Return the current resolved LogicValue of the terminal Node."""
+        return self._node.value

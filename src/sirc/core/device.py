@@ -119,3 +119,16 @@ class Probe(LogicDevice):
     def sample(self) -> LogicValue:
         """Return the current resolved LogicValue of the terminal Node."""
         return self._node.value
+
+
+# ------------------------------------------------------------------------------
+# Port Device
+# ------------------------------------------------------------------------------
+
+
+class Port(LogicDevice):
+    """
+    Logic signal port device.
+
+    This device is a passive connection point for linking circuit Nodes.
+    """

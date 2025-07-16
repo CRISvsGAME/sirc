@@ -2,7 +2,7 @@
 
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
-from sirc.core.device import VDD, GND, Input
+from sirc.core.device import VDD, GND, Input, Probe
 
 # ------------------------------------------------------------------------------
 # Rail Tests
@@ -59,4 +59,37 @@ def test_input_terminal_node_is_unique():
     """Each Input instance must have its own unique terminal Node."""
     a = Input()
     b = Input()
+    assert a.terminal is not b.terminal
+
+
+# ------------------------------------------------------------------------------
+# Probe Device Tests
+# ------------------------------------------------------------------------------
+
+
+def test_probe_default_state():
+    """Probe must default to driving LogicValue.Z."""
+    p = Probe()
+    assert p.value is LogicValue.Z
+    assert isinstance(p.terminal, Node)
+
+
+def test_probe_sample_reads_node_value():
+    """Probe.sample() must return the LogicValue present on its terminal Node."""
+    p = Probe()
+    n = p.terminal
+    n.set_resolved_value(LogicValue.ONE)
+    assert p.sample() is LogicValue.ONE
+    n.set_resolved_value(LogicValue.ZERO)
+    assert p.sample() is LogicValue.ZERO
+    n.set_resolved_value(LogicValue.X)
+    assert p.sample() is LogicValue.X
+    n.set_resolved_value(LogicValue.Z)
+    assert p.sample() is LogicValue.Z
+
+
+def test_probe_terminal_node_is_unique():
+    """Each Probe instance must have its own unique terminal Node."""
+    a = Probe()
+    b = Probe()
     assert a.terminal is not b.terminal

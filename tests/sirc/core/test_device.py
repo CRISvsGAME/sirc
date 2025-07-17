@@ -2,7 +2,7 @@
 
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
-from sirc.core.device import VDD, GND, Input, Probe
+from sirc.core.device import VDD, GND, Input, Probe, Port
 
 # ------------------------------------------------------------------------------
 # Rail Tests
@@ -92,4 +92,23 @@ def test_probe_terminal_node_is_unique():
     """Each Probe instance must have its own unique terminal Node."""
     a = Probe()
     b = Probe()
+    assert a.terminal is not b.terminal
+
+
+# ------------------------------------------------------------------------------
+# Port Device Tests
+# ------------------------------------------------------------------------------
+
+
+def test_port_default_state():
+    """Port must default to driving LogicValue.Z."""
+    p = Port()
+    assert p.value is LogicValue.Z
+    assert isinstance(p.terminal, Node)
+
+
+def test_port_terminal_node_is_unique():
+    """Each Port instance must have its own unique terminal Node."""
+    a = Port()
+    b = Port()
     assert a.terminal is not b.terminal

@@ -1,5 +1,6 @@
 """Unit tests for sirc.core.device module."""
 
+import pytest
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 from sirc.core.device import VDD, GND, Input, Probe, Port
@@ -112,3 +113,19 @@ def test_port_terminal_node_is_unique():
     a = Port()
     b = Port()
     assert a.terminal is not b.terminal
+
+
+# ------------------------------------------------------------------------------
+# Debug Representation Tests
+# ------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("device_class", [VDD, GND, Input, Probe, Port])
+def test_repr_contains_class_value_terminal_info(device_class: type):
+    """__repr__ must include class name, value, and terminal information."""
+    d = device_class()
+    r = repr(d)
+    assert r.startswith(f"<{device_class.__name__} ")
+    assert "value=" in r
+    assert "terminal=" in r
+    assert r.endswith(">")

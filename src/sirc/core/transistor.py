@@ -52,3 +52,23 @@ class Transistor(ABC):
         should be treated as members of the same node-group.
         """
         raise NotImplementedError("Must be implemented by subclasses.")
+
+    # --------------------------------------------------------------------------
+    # Public Methods
+    # --------------------------------------------------------------------------
+
+    def terminals(self) -> tuple[Node, Node, Node]:
+        """
+        Return a tuple of (gate, source, drain) Nodes.
+
+        Used by the Simulator for registration and structural traversal.
+        """
+        return (self.gate, self.source, self.drain)
+
+    def conduction_nodes(self) -> tuple[Node, Node]:
+        """
+        Return the (source, drain) Nodes involved in conduction.
+
+        Used by the Simulator when establishing or removing connectivity.
+        """
+        return (self.source, self.drain)

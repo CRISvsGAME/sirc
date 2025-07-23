@@ -72,3 +72,12 @@ class Transistor(ABC):
         Used by the Simulator when establishing or removing connectivity.
         """
         return (self.source, self.drain)
+
+    # --------------------------------------------------------------------------
+    # Debug Representation
+    # --------------------------------------------------------------------------
+
+    def __repr__(self) -> str:
+        """Return a debug representation of this Transistor."""
+        name = self.__class__.__name__
+        return f"<{name} gate={self.gate} source={self.source} drain={self.drain}>"

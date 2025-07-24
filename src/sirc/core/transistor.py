@@ -9,6 +9,7 @@ the Simulator evaluates each device's conduction state based on its gate value.
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 
 
@@ -81,3 +82,22 @@ class Transistor(ABC):
         """Return a debug representation of this Transistor."""
         name = self.__class__.__name__
         return f"<{name} gate={self.gate} source={self.source} drain={self.drain}>"
+
+
+# ------------------------------------------------------------------------------
+# NMOS Transistor Implementation
+# ------------------------------------------------------------------------------
+
+
+class NMOS(Transistor):
+    """
+    NMOS transistor device.
+
+    Conduction Rule:
+        - Conducts when the gate value is LogicValue.ONE.
+        - Non-conducting for ZERO, X, or Z.
+    """
+
+    def is_conducting(self) -> bool:
+        g = self.gate.value
+        return g is LogicValue.ONE

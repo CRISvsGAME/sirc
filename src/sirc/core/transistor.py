@@ -35,9 +35,9 @@ class Transistor(ABC):
         All Nodes begin in high-impedance (Z) state with no drivers. These Nodes
         belong exclusively to this device and are never shared.
         """
-        self.gate = Node()
-        self.source = Node()
-        self.drain = Node()
+        self.gate: Node = Node()
+        self.source: Node = Node()
+        self.drain: Node = Node()
 
     # --------------------------------------------------------------------------
     # Abstract Methods

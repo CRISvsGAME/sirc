@@ -29,3 +29,25 @@ def test_transistor_initial_node_state():
     assert not t.gate.get_drivers()
     assert not t.source.get_drivers()
     assert not t.drain.get_drivers()
+
+
+# ------------------------------------------------------------------------------
+# Structural Helper Tests
+# ------------------------------------------------------------------------------
+
+
+def test_terminals_returns_gate_source_drain():
+    """terminals() must return (gate, source, drain) Nodes in order."""
+    t = NMOS()
+    g, s, d = t.terminals()
+    assert g is t.gate
+    assert s is t.source
+    assert d is t.drain
+
+
+def test_conduction_nodes_returns_source_and_drain():
+    """conduction_nodes() must return (source, drain) Nodes in order."""
+    t = PMOS()
+    s, d = t.conduction_nodes()
+    assert s is t.source
+    assert d is t.drain

@@ -51,3 +51,25 @@ def test_conduction_nodes_returns_source_and_drain():
     s, d = t.conduction_nodes()
     assert s is t.source
     assert d is t.drain
+
+
+# ------------------------------------------------------------------------------
+# NMOS Conduction Tests
+# ------------------------------------------------------------------------------
+
+
+def test_nmos_conduction_rules():
+    """NMOS must conduct only when gate is LogicValue.ONE."""
+    t = NMOS()
+    # Gate = 0 → off
+    t.gate.set_resolved_value(LogicValue.ZERO)
+    assert not t.is_conducting()
+    # Gate = 1 → on
+    t.gate.set_resolved_value(LogicValue.ONE)
+    assert t.is_conducting()
+    # Gate = X → off
+    t.gate.set_resolved_value(LogicValue.X)
+    assert not t.is_conducting()
+    # Gate = Z → off
+    t.gate.set_resolved_value(LogicValue.Z)
+    assert not t.is_conducting()

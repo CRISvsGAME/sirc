@@ -73,3 +73,25 @@ def test_nmos_conduction_rules():
     # Gate = Z → off
     t.gate.set_resolved_value(LogicValue.Z)
     assert not t.is_conducting()
+
+
+# ------------------------------------------------------------------------------
+# PMOS Conduction Tests
+# ------------------------------------------------------------------------------
+
+
+def test_pmos_conduction_rules():
+    """PMOS must conduct only when gate is LogicValue.ZERO."""
+    t = PMOS()
+    # Gate = 0 → on
+    t.gate.set_resolved_value(LogicValue.ZERO)
+    assert t.is_conducting()
+    # Gate = 1 → off
+    t.gate.set_resolved_value(LogicValue.ONE)
+    assert not t.is_conducting()
+    # Gate = X → off
+    t.gate.set_resolved_value(LogicValue.X)
+    assert not t.is_conducting()
+    # Gate = Z → off
+    t.gate.set_resolved_value(LogicValue.Z)
+    assert not t.is_conducting()

@@ -2,7 +2,7 @@
 
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
-from sirc.core.transistor import NMOS, PMOS
+from sirc.core.transistor import Transistor, NMOS, PMOS
 
 # ------------------------------------------------------------------------------
 # Transistor Construction Tests
@@ -95,3 +95,18 @@ def test_pmos_conduction_rules():
     # Gate = Z → off
     t.gate.set_resolved_value(LogicValue.Z)
     assert not t.is_conducting()
+
+
+# ------------------------------------------------------------------------------
+# Polymorphism Tests
+# ------------------------------------------------------------------------------
+
+
+def test_nmos_and_pmos_share_same_interface():
+    """NMOS and PMOS must both be Transistor subclasses with is_conducting()."""
+    nmos = NMOS()
+    pmos = PMOS()
+    assert isinstance(nmos, Transistor)
+    assert isinstance(pmos, Transistor)
+    assert hasattr(nmos, "is_conducting")
+    assert hasattr(pmos, "is_conducting")

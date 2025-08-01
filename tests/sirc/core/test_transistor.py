@@ -110,3 +110,32 @@ def test_nmos_and_pmos_share_same_interface():
     assert isinstance(pmos, Transistor)
     assert hasattr(nmos, "is_conducting")
     assert hasattr(pmos, "is_conducting")
+
+
+# ------------------------------------------------------------------------------
+# Debug Representation Tests
+# ------------------------------------------------------------------------------
+
+
+def test_nmos_repr_format():
+    """NMOS __repr__ must include class name and terminal fields."""
+    t = NMOS()
+    r = repr(t)
+    assert "NMOS" in r
+    assert "gate=" in r
+    assert "source=" in r
+    assert "drain=" in r
+    assert r.startswith("<NMOS ")
+    assert r.endswith(">")
+
+
+def test_pmos_repr_format():
+    """PMOS __repr__ must include class name and terminal fields."""
+    t = PMOS()
+    r = repr(t)
+    assert "PMOS" in r
+    assert "gate=" in r
+    assert "source=" in r
+    assert "drain=" in r
+    assert r.startswith("<PMOS ")
+    assert r.endswith(">")

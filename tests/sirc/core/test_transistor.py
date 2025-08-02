@@ -139,3 +139,17 @@ def test_pmos_repr_format():
     assert "drain=" in r
     assert r.startswith("<PMOS ")
     assert r.endswith(">")
+
+
+# ------------------------------------------------------------------------------
+# Isolation Tests
+# ------------------------------------------------------------------------------
+
+
+def test_transistor_nodes_are_not_shared_between_instances():
+    """Each Transistor instance must have its own unique Nodes."""
+    nmos = NMOS()
+    pmos = PMOS()
+    assert nmos.gate is not pmos.gate
+    assert nmos.source is not pmos.source
+    assert nmos.drain is not pmos.drain

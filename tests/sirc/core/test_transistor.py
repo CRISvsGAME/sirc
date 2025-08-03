@@ -153,3 +153,19 @@ def test_transistor_nodes_are_not_shared_between_instances():
     assert nmos.gate is not pmos.gate
     assert nmos.source is not pmos.source
     assert nmos.drain is not pmos.drain
+
+
+# ------------------------------------------------------------------------------
+# Stress & Stability Tests
+# ------------------------------------------------------------------------------
+
+
+def test_multiple_transistors_construction():
+    """Creating many Transistor instances must yield unique Nodes."""
+    ts = [NMOS() for _ in range(1000)]
+    ids = {id(t.gate) for t in ts}
+    assert len(ids) == 1000
+    ids = {id(t.source) for t in ts}
+    assert len(ids) == 1000
+    ids = {id(t.drain) for t in ts}
+    assert len(ids) == 1000

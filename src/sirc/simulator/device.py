@@ -113,3 +113,27 @@ class DeviceSimulator:
         """
         for transistor in transistors:
             self.unregister_transistor(transistor)
+
+    # --------------------------------------------------------------------------
+    # Logical Connection
+    # --------------------------------------------------------------------------
+
+    def connect(self, a: Node, b: Node) -> None:
+        """
+        Create a bidirectional connection between two Nodes.
+
+        Args:
+            a: The first Node.
+            b: The second Node.
+        """
+        a.connect(b)
+
+    def disconnect(self, a: Node, b: Node) -> None:
+        """
+        Remove the bidirectional connection between two Nodes.
+
+        Args:
+            a: The first Node.
+            b: The second Node.
+        """
+        a.disconnect(b)

@@ -9,6 +9,7 @@ paths, and propagate LogicValues across connected node-groups.
 
 from __future__ import annotations
 from typing import Iterable
+from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 from sirc.core.device import LogicDevice
 from sirc.core.transistor import Transistor
@@ -137,3 +138,101 @@ class DeviceSimulator:
             b: The second Node.
         """
         a.disconnect(b)
+
+    # --------------------------------------------------------------------------
+    # Simulation Execution
+    # --------------------------------------------------------------------------
+
+    def _dfs(self, collection: Iterable[Node]) -> list[set[Node]]:
+        """
+        Perform depth-first search to identify connected node-groups.
+
+        Args:
+            collection: Iterable of Nodes to explore.
+
+        Returns:
+            List of sets, each containing Nodes in a connected group.
+        """
+        visited: set[Node] = set()
+        stack: list[Node] = []
+        groups: list[set[Node]] = []
+
+        for start in collection:
+            if start in visited:
+                continue
+
+            stack.append(start)
+            group: set[Node] = set()
+
+            while stack:
+                node = stack.pop()
+
+                if node in visited:
+                    continue
+
+                visited.add(node)
+                group.add(node)
+
+                for neighbor in node.get_connections():
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+
+            groups.append(group)
+
+        return groups
+
+    def _resolve_groups(self, groups: list[set[Node]]) -> None:
+        """
+        Resolve LogicValues for each connected node-group.
+
+        Args:
+            groups: List of node-groups to resolve.
+        """
+        for group in groups:
+            drivers: list[LogicValue] = [LogicValue.Z]
+
+            for node in group:
+                drivers.extend(node.get_drivers())
+
+            resolved_value: LogicValue = LogicValue.resolve_all(drivers)
+
+            for node in group:
+                node.set_resolved_value(resolved_value)
+
+    def tick(self) -> None:
+        """
+        Execute a simulation tick to update device states and connectivity.
+
+        This method performs the following steps:
+            1. Clears all Node drivers.
+            2. Applies LogicDevice outputs to their terminal Nodes.
+            3. Repeatedly:
+                a. Identifies connected node-groups via DFS.
+                b. Resolves LogicValues for each group.
+                c. Updates transistor conduction paths.
+            4. Continues until a fixed-point state is reached.
+        """
+        for node in self.nodes:
+            node.clear_drivers()
+
+        for device in self.devices:
+            device.terminal.add_driver(device.value)
+
+        while True:
+            groups = self._dfs(self.nodes)
+            self._resolve_groups(groups)
+            fixed_point = True
+
+            for transistor in self.transistors:
+                a, b = transistor.conduction_nodes()
+                if transistor.is_conducting():
+                    if a not in b.get_connections():
+                        transistor.source.connect(transistor.drain)
+                        fixed_point = False
+                else:
+                    if a in b.get_connections():
+                        transistor.source.disconnect(transistor.drain)
+                        fixed_point = False
+
+            if fixed_point:
+                break

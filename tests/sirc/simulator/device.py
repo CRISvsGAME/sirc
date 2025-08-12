@@ -1,6 +1,7 @@
 """Unit tests for sirc.simulator.device module."""
 
 from sirc.simulator.device import DeviceSimulator
+from sirc.core.node import Node
 from sirc.core.device import LogicDevice, VDD, GND, Input, Probe, Port
 from sirc.core.transistor import Transistor, NMOS, PMOS
 
@@ -108,3 +109,29 @@ def test_unregister_multiple_transistors():
         assert t.gate not in sim.nodes
         assert t.source not in sim.nodes
         assert t.drain not in sim.nodes
+
+
+# ------------------------------------------------------------------------------
+# Connectivity Tests
+# ------------------------------------------------------------------------------
+
+
+def test_connect_creates_bidirectional_connection():
+    """Connecting two nodes creates a bidirectional connection."""
+    sim = DeviceSimulator()
+    a = Node()
+    b = Node()
+    sim.connect(a, b)
+    assert a in b.get_connections()
+    assert b in a.get_connections()
+
+
+def test_disconnect_removes_bidirectional_connection():
+    """Disconnecting two nodes removes the bidirectional connection."""
+    sim = DeviceSimulator()
+    a = Node()
+    b = Node()
+    sim.connect(a, b)
+    sim.disconnect(a, b)
+    assert a not in b.get_connections()
+    assert b not in a.get_connections()

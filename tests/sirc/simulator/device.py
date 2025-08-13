@@ -1,6 +1,7 @@
 """Unit tests for sirc.simulator.device module."""
 
 from sirc.simulator.device import DeviceSimulator
+from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 from sirc.core.device import LogicDevice, VDD, GND, Input, Probe, Port
 from sirc.core.transistor import Transistor, NMOS, PMOS
@@ -135,3 +136,23 @@ def test_disconnect_removes_bidirectional_connection():
     sim.disconnect(a, b)
     assert a not in b.get_connections()
     assert b not in a.get_connections()
+
+
+# ------------------------------------------------------------------------------
+# Static Behavior Tick Tests
+# ------------------------------------------------------------------------------
+
+
+def test_tick_with_simple_devices():
+    """Devices must drive their terminal Nodes after a tick()."""
+    sim = DeviceSimulator()
+    inp = Input()
+    probe = Probe()
+    sim.register_devices([inp, probe])
+    sim.connect(inp.terminal, probe.terminal)
+    inp.set_value(LogicValue.ONE)
+    sim.tick()
+    assert probe.sample() is LogicValue.ONE
+    inp.set_value(LogicValue.ZERO)
+    sim.tick()
+    assert probe.sample() is LogicValue.ZERO

@@ -14,7 +14,7 @@ readme = "README.md"
 license = "MIT"
 keywords = ["digital logic", "circuit simulation", "simulation engine"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["mypy", "pylint", "pytest"]
+dev = ["build", "mypy", "pylint", "pytest", "twine"]
 
 [project.urls]
 Repository = "https://github.com/CRISvsGAME/sirc.git"

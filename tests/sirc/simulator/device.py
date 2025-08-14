@@ -156,3 +156,39 @@ def test_tick_with_simple_devices():
     inp.set_value(LogicValue.ZERO)
     sim.tick()
     assert probe.sample() is LogicValue.ZERO
+
+
+# ------------------------------------------------------------------------------
+# Dynamic Behavior Tick Tests
+# ------------------------------------------------------------------------------
+
+
+def test_tick_cmos_inverter():
+    """CMOS inverter must function correctly."""
+    sim = DeviceSimulator()
+    vdd = VDD()
+    gnd = GND()
+    inp = Input()
+    probe = Probe()
+    inp_port = Port()
+    out_port = Port()
+    pmos = PMOS()
+    nmos = NMOS()
+    sim.register_devices([vdd, gnd, inp, probe, inp_port, out_port])
+    sim.register_transistors([pmos, nmos])
+    sim.connect(inp.terminal, inp_port.terminal)
+    sim.connect(inp_port.terminal, pmos.gate)
+    sim.connect(inp_port.terminal, nmos.gate)
+    sim.connect(vdd.terminal, pmos.source)
+    sim.connect(gnd.terminal, nmos.source)
+    sim.connect(pmos.drain, out_port.terminal)
+    sim.connect(nmos.drain, out_port.terminal)
+    sim.connect(out_port.terminal, probe.terminal)
+    # Input = 0 → Probe = 1
+    inp.set_value(LogicValue.ZERO)
+    sim.tick()
+    assert probe.sample() is LogicValue.ONE
+    # Input = 1 → Probe = 0
+    inp.set_value(LogicValue.ONE)
+    sim.tick()
+    assert probe.sample() is LogicValue.ZERO

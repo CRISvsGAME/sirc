@@ -9,10 +9,10 @@ from sirc.core.node import Node
 
 
 def test_node_initial_state():
-    """A new Node must have Z value, no drivers, and no connections."""
+    """A new Node must have Z value, Z driver, and no connections."""
     n = Node()
-    assert n.value is LogicValue.Z
-    assert not n.get_drivers()
+    assert n.value is LogicValue.Z  # Default Value
+    assert n.get_drivers() == (LogicValue.Z,)  # Default Driver
     assert not n.get_connections()
 
 
@@ -55,6 +55,7 @@ def test_add_driver():
     n.add_driver(LogicValue.X)
     n.add_driver(LogicValue.Z)
     assert n.get_drivers() == (
+        LogicValue.Z,  # Default Driver
         LogicValue.ZERO,
         LogicValue.ONE,
         LogicValue.X,
@@ -68,18 +69,18 @@ def test_add_many_drivers():
     n = Node()
     for _ in range(count):
         n.add_driver(LogicValue.ZERO)
-    assert len(n.get_drivers()) == count
+    assert len(n.get_drivers()) == count + 1  # Including Default Driver
 
 
 def test_clear_drivers():
-    """clear_drivers() must remove all drivers."""
+    """clear_drivers() must reset the Node to default Z driver and Z value."""
     n = Node()
     n.add_driver(LogicValue.ZERO)
     n.add_driver(LogicValue.ONE)
     n.add_driver(LogicValue.X)
     n.add_driver(LogicValue.Z)
     n.clear_drivers()
-    assert not n.get_drivers()
+    assert n.get_drivers() == (LogicValue.Z,)  # Default Driver
 
 
 def test_get_drivers():
@@ -91,7 +92,13 @@ def test_get_drivers():
     n.add_driver(LogicValue.Z)
     drivers = n.get_drivers()
     assert isinstance(drivers, tuple)
-    assert drivers == (LogicValue.ZERO, LogicValue.ONE, LogicValue.X, LogicValue.Z)
+    assert drivers == (
+        LogicValue.Z,  # Default Driver
+        LogicValue.ZERO,
+        LogicValue.ONE,
+        LogicValue.X,
+        LogicValue.Z,
+    )
 
 
 # ------------------------------------------------------------------------------
@@ -198,7 +205,7 @@ def test_repr_contains_value_and_drivers():
     r = repr(n)
     assert "Node" in r
     assert "value=LogicValue.Z" in r
-    assert "drivers=(LogicValue.ONE,)" in r
+    assert "drivers=(LogicValue.Z, LogicValue.ONE)" in r
 
 
 def test_repr_format():

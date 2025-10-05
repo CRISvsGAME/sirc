@@ -14,7 +14,7 @@ class Node:
     """
     A Node is a passive logical connection point in the SIRC circuit model.
 
-    It may hold zero or more driver LogicValues and may be directly connected
+    It may hold one or more driver LogicValues and may be directly connected
     to other Nodes. A Node performs no resolution or computation by itself;
     all evaluation and propagation are handled entirely by the Simulator.
     """
@@ -22,8 +22,8 @@ class Node:
     __slots__ = ("_drivers", "_connections", "_value")
 
     def __init__(self) -> None:
-        """Create an isolated Node with no drivers and a default Z value."""
-        self._drivers: list[LogicValue] = []
+        """Create an isolated Node with default Z driver and Z value."""
+        self._drivers: list[LogicValue] = [LogicValue.Z]
         self._connections: set[Node] = set()
         self._value: LogicValue = LogicValue.Z
 
@@ -59,8 +59,9 @@ class Node:
         self._drivers.append(value)
 
     def clear_drivers(self) -> None:
-        """Remove all driver LogicValues from this Node."""
-        self._drivers.clear()
+        """Reset the Node to default Z driver and Z value."""
+        self._drivers[:] = [LogicValue.Z]
+        self._value = LogicValue.Z
 
     def get_drivers(self) -> tuple[LogicValue, ...]:
         """Return all driver LogicValues as an immutable tuple."""

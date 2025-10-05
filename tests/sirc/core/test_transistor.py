@@ -20,17 +20,6 @@ def test_transistor_has_three_distinct_nodes():
     assert t.source is not t.drain
 
 
-def test_transistor_initial_node_state():
-    """Transistor Nodes must default to LogicValue.Z and have no drivers."""
-    t = PMOS()
-    assert t.gate.value is LogicValue.Z
-    assert t.source.value is LogicValue.Z
-    assert t.drain.value is LogicValue.Z
-    assert not t.gate.get_drivers()
-    assert not t.source.get_drivers()
-    assert not t.drain.get_drivers()
-
-
 # ------------------------------------------------------------------------------
 # Structural Helper Tests
 # ------------------------------------------------------------------------------

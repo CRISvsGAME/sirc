@@ -189,7 +189,7 @@ class DeviceSimulator:
             groups: List of node-groups to resolve.
         """
         for group in groups:
-            drivers: list[LogicValue] = [LogicValue.Z]
+            drivers: list[LogicValue] = []
 
             for node in group:
                 drivers.extend(node.get_drivers())

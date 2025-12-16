@@ -8,7 +8,6 @@ IEEE 1800-2023, but the terminology used here follows SIRC conventions.
 
 from __future__ import annotations
 from enum import Enum, unique
-from typing import Iterable
 
 
 @unique
@@ -77,33 +76,24 @@ class LogicValue(Enum):
             ---+---+---+---+---
              Z | 0 | 1 | X | Z
         """
-        result = self
 
-        if self is not other:
+        if self is other:
+            return self
 
-            if self.is_x or other.is_x:
-                result = LogicValue.X
+        if self is LogicValue.Z:
+            return other
 
-            elif self.is_z and other.is_z:
-                result = LogicValue.Z
+        if other is LogicValue.Z:
+            return self
 
-            elif (self.is_zero and other.is_one) or (self.is_one and other.is_zero):
-                result = LogicValue.X
-
-            elif self.is_z:
-                result = other
-
-            elif other.is_z:
-                result = self
-
-        return result
+        return LogicValue.X
 
     # --------------------------------------------------------------------------
     # Multi-Driver Resolution
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def resolve_all(values: Iterable[LogicValue]) -> LogicValue:
+    def resolve_all(values: set[LogicValue]) -> LogicValue:
         """
         Resolve multiple driver values into a single LogicValue.
 
@@ -116,19 +106,22 @@ class LogicValue(Enum):
         Returns:
             LogicValue: The resolved value.
         """
-        iterator = iter(values)
+        if LogicValue.X in values:
+            return LogicValue.X
 
-        try:
-            result = next(iterator)
-        except StopIteration as e:
-            raise ValueError("resolve_all() requires at least one LogicValue.") from e
+        if LogicValue.ZERO in values and LogicValue.ONE in values:
+            return LogicValue.X
 
-        for value in iterator:
-            result = result.resolve(value)
-            if result.is_x:
-                return LogicValue.X
+        if LogicValue.ZERO in values:
+            return LogicValue.ZERO
 
-        return result
+        if LogicValue.ONE in values:
+            return LogicValue.ONE
+
+        if LogicValue.Z in values:
+            return LogicValue.Z
+
+        raise ValueError("resolve_all() requires at least one LogicValue.")
 
     # --------------------------------------------------------------------------
     # Display Helpers

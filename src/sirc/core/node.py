@@ -23,8 +23,8 @@ class Node:
 
     def __init__(self) -> None:
         """Create an isolated Node with default Z driver and Z value."""
-        self._drivers: list[LogicValue] = [LogicValue.Z]
-        self._connections: set[Node] = set()
+        self._drivers: set[LogicValue] = {LogicValue.Z}
+        self._connections: list[Node] = []
         self._value: LogicValue = LogicValue.Z
 
     # --------------------------------------------------------------------------
@@ -56,16 +56,17 @@ class Node:
         Args:
             value: The LogicValue driving this Node.
         """
-        self._drivers.append(value)
+        self._drivers.add(value)
 
     def clear_drivers(self) -> None:
         """Reset the Node to default Z driver and Z value."""
-        self._drivers[:] = [LogicValue.Z]
+        self._drivers.clear()
+        self._drivers.add(LogicValue.Z)
         self._value = LogicValue.Z
 
-    def get_drivers(self) -> tuple[LogicValue, ...]:
-        """Return all driver LogicValues as an immutable tuple."""
-        return tuple(self._drivers)
+    def get_drivers(self) -> set[LogicValue]:
+        """Return all driver LogicValues as a set."""
+        return self._drivers
 
     # --------------------------------------------------------------------------
     # Connectivity
@@ -73,11 +74,13 @@ class Node:
 
     def add_connection(self, other: Node) -> None:
         """INTERNAL USE ONLY: Add a direct connection to another Node."""
-        self._connections.add(other)
+        if other not in self._connections:
+            self._connections.append(other)
 
     def remove_connection(self, other: Node) -> None:
         """INTERNAL USE ONLY: Remove a direct connection to another Node."""
-        self._connections.discard(other)
+        if other in self._connections:
+            self._connections.remove(other)
 
     def connect(self, other: Node) -> None:
         """
@@ -105,9 +108,9 @@ class Node:
         self.remove_connection(other)
         other.remove_connection(self)
 
-    def get_connections(self) -> tuple[Node, ...]:
-        """Return all directly connected Nodes as an immutable tuple."""
-        return tuple(self._connections)
+    def get_connections(self) -> list[Node]:
+        """Return all directly connected Nodes as a list."""
+        return self._connections
 
     # --------------------------------------------------------------------------
     # Debug Representation

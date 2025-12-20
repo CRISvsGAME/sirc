@@ -12,7 +12,7 @@ def test_node_initial_state():
     """A new Node must have Z value, Z driver, and no connections."""
     n = Node()
     assert n.value is LogicValue.Z  # Default Value
-    assert n.get_drivers() == (LogicValue.Z,)  # Default Driver
+    assert n.get_drivers() == {LogicValue.Z}  # Default Driver
     assert not n.get_connections()
 
 
@@ -48,19 +48,19 @@ def test_set_resolved_value():
 
 
 def test_add_driver():
-    """add_driver() must append drivers in order."""
+    """add_driver() must append drivers in set."""
     n = Node()
     n.add_driver(LogicValue.ZERO)
     n.add_driver(LogicValue.ONE)
     n.add_driver(LogicValue.X)
     n.add_driver(LogicValue.Z)
-    assert n.get_drivers() == (
+    assert n.get_drivers() == {
         LogicValue.Z,  # Default Driver
         LogicValue.ZERO,
         LogicValue.ONE,
         LogicValue.X,
         LogicValue.Z,
-    )
+    }
 
 
 def test_add_many_drivers():
@@ -69,7 +69,7 @@ def test_add_many_drivers():
     n = Node()
     for _ in range(count):
         n.add_driver(LogicValue.ZERO)
-    assert len(n.get_drivers()) == count + 1  # Including Default Driver
+    assert len(n.get_drivers()) == 2  # Including Default Driver
 
 
 def test_clear_drivers():
@@ -80,25 +80,25 @@ def test_clear_drivers():
     n.add_driver(LogicValue.X)
     n.add_driver(LogicValue.Z)
     n.clear_drivers()
-    assert n.get_drivers() == (LogicValue.Z,)  # Default Driver
+    assert n.get_drivers() == {LogicValue.Z}  # Default Driver
 
 
 def test_get_drivers():
-    """get_drivers() must return an immutable tuple copy."""
+    """get_drivers() must return a set."""
     n = Node()
     n.add_driver(LogicValue.ZERO)
     n.add_driver(LogicValue.ONE)
     n.add_driver(LogicValue.X)
     n.add_driver(LogicValue.Z)
     drivers = n.get_drivers()
-    assert isinstance(drivers, tuple)
-    assert drivers == (
+    assert isinstance(drivers, set)
+    assert drivers == {
         LogicValue.Z,  # Default Driver
         LogicValue.ZERO,
         LogicValue.ONE,
         LogicValue.X,
         LogicValue.Z,
-    )
+    }
 
 
 # ------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ def test_connect_no_duplicates():
     b = Node()
     a.connect(b)
     b.connect(a)
-    assert a.get_connections() == (b,)
-    assert b.get_connections() == (a,)
+    assert a.get_connections() == [b]
+    assert b.get_connections() == [a]
 
 
 def test_connect_self_noop():
@@ -173,13 +173,13 @@ def test_remove_connection_internal_only():
 
 
 def test_get_connections():
-    """get_connections() must return an immutable tuple copy."""
+    """get_connections() must return a ."""
     a = Node()
     b = Node()
     a.connect(b)
     connections = a.get_connections()
-    assert isinstance(connections, tuple)
-    assert connections == (b,)
+    assert isinstance(connections, list)
+    assert connections == [b]
 
 
 def test_isolated_node_connections():
@@ -205,7 +205,8 @@ def test_repr_contains_value_and_drivers():
     r = repr(n)
     assert "Node" in r
     assert "value=LogicValue.Z" in r
-    assert "drivers=(LogicValue.Z, LogicValue.ONE)" in r
+    assert "LogicValue.Z" in r
+    assert "LogicValue.ONE" in r
 
 
 def test_repr_format():

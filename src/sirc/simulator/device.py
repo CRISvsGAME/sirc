@@ -27,9 +27,9 @@ class DeviceSimulator:
 
     def __init__(self) -> None:
         """SIRC"""
-        self.devices: set[LogicDevice] = set()
-        self.transistors: set[Transistor] = set()
-        self.nodes: set[Node] = set()
+        self.devices: list[LogicDevice] = []
+        self.transistors: list[Transistor] = []
+        self.nodes: list[Node] = []
 
     # --------------------------------------------------------------------------
     # Device Registration
@@ -42,8 +42,8 @@ class DeviceSimulator:
         Args:
             device: The LogicDevice to register.
         """
-        self.devices.add(device)
-        self.nodes.add(device.terminal)
+        self.devices.append(device)
+        self.nodes.append(device.terminal)
 
     def register_devices(self, devices: Iterable[LogicDevice]) -> None:
         """
@@ -62,8 +62,8 @@ class DeviceSimulator:
         Args:
             transistor: The Transistor to register.
         """
-        self.transistors.add(transistor)
-        self.nodes.update(transistor.terminals())
+        self.transistors.append(transistor)
+        self.nodes.extend(transistor.terminals())
 
     def register_transistors(self, transistors: Iterable[Transistor]) -> None:
         """
@@ -82,8 +82,8 @@ class DeviceSimulator:
         Args:
             device: The LogicDevice to unregister.
         """
-        self.devices.discard(device)
-        self.nodes.discard(device.terminal)
+        self.devices.remove(device)
+        self.nodes.remove(device.terminal)
 
     def unregister_devices(self, devices: Iterable[LogicDevice]) -> None:
         """
@@ -102,8 +102,9 @@ class DeviceSimulator:
         Args:
             transistor: The Transistor to unregister.
         """
-        self.transistors.discard(transistor)
-        self.nodes.difference_update(transistor.terminals())
+        self.transistors.remove(transistor)
+        for terminal in transistor.terminals():
+            self.nodes.remove(terminal)
 
     def unregister_transistors(self, transistors: Iterable[Transistor]) -> None:
         """
@@ -143,7 +144,7 @@ class DeviceSimulator:
     # Simulation Execution
     # --------------------------------------------------------------------------
 
-    def _dfs(self, collection: Iterable[Node]) -> list[set[Node]]:
+    def _dfs(self, collection: Iterable[Node]) -> list[list[Node]]:
         """
         Perform depth-first search to identify connected node-groups.
 
@@ -151,18 +152,18 @@ class DeviceSimulator:
             collection: Iterable of Nodes to explore.
 
         Returns:
-            List of sets, each containing Nodes in a connected group.
+            List of lists, each containing Nodes in a connected group.
         """
         visited: set[Node] = set()
         stack: list[Node] = []
-        groups: list[set[Node]] = []
+        groups: list[list[Node]] = []
 
         for start in collection:
             if start in visited:
                 continue
 
             stack.append(start)
-            group: set[Node] = set()
+            group: list[Node] = []
 
             while stack:
                 node = stack.pop()
@@ -171,7 +172,7 @@ class DeviceSimulator:
                     continue
 
                 visited.add(node)
-                group.add(node)
+                group.append(node)
 
                 for neighbor in node.get_connections():
                     if neighbor not in visited:
@@ -181,7 +182,7 @@ class DeviceSimulator:
 
         return groups
 
-    def _resolve_groups(self, groups: list[set[Node]]) -> None:
+    def _resolve_groups(self, groups: list[list[Node]]) -> None:
         """
         Resolve LogicValues for each connected node-group.
 
@@ -189,10 +190,10 @@ class DeviceSimulator:
             groups: List of node-groups to resolve.
         """
         for group in groups:
-            drivers: list[LogicValue] = []
+            drivers: set[LogicValue] = set()
 
             for node in group:
-                drivers.extend(node.get_drivers())
+                drivers.update(node.get_drivers())
 
             resolved_value: LogicValue = LogicValue.resolve_all(drivers)
 

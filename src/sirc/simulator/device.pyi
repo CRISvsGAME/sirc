@@ -5,9 +5,9 @@ from sirc.core.transistor import Transistor as Transistor
 from typing import Iterable
 
 class DeviceSimulator:
-    devices: set[LogicDevice]
-    transistors: set[Transistor]
-    nodes: set[Node]
+    devices: list[LogicDevice]
+    transistors: list[Transistor]
+    nodes: list[Node]
     def __init__(self) -> None: ...
     def register_device(self, device: LogicDevice) -> None: ...
     def register_devices(self, devices: Iterable[LogicDevice]) -> None: ...

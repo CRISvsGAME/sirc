@@ -8,6 +8,7 @@ IEEE 1800-2023, but the terminology used here follows SIRC conventions.
 
 from __future__ import annotations
 from enum import Enum, unique
+from typing import Iterable
 
 
 @unique
@@ -93,7 +94,7 @@ class LogicValue(Enum):
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def resolve_all(values: set[LogicValue]) -> LogicValue:
+    def resolve_all(values: Iterable[LogicValue]) -> LogicValue:
         """
         Resolve multiple driver values into a single LogicValue.
 

@@ -14,21 +14,39 @@ class Node:
     """
     A Node is a passive logical connection point in the SIRC circuit model.
 
-    It may hold one or more driver LogicValues and may be directly connected
+    A Node holds one default LogicValue and may be directly connected
     to other Nodes. A Node performs no resolution or computation by itself;
     all evaluation and propagation are handled entirely by the Simulator.
     """
 
-    __slots__ = ("_drivers", "_connections", "_value")
+    __slots__ = ("_default_value", "_resolved_value", "_connections")
 
     def __init__(self) -> None:
-        """Create an isolated Node with default Z driver and Z value."""
-        self._drivers: set[LogicValue] = {LogicValue.Z}
-        self._connections: list[Node] = []
-        self._value: LogicValue = LogicValue.Z
+        """Create an isolated Node with default LogicValue Z."""
+        self._default_value: LogicValue = LogicValue.Z
+        self._resolved_value: LogicValue = LogicValue.Z
+        self._connections: set[Node] = set()
 
     # --------------------------------------------------------------------------
-    # Value Handling (Simulator-Controlled)
+    # Default Value Handling (Device-Controlled)
+    # --------------------------------------------------------------------------
+
+    def set_default_value(self, value: LogicValue) -> None:
+        """
+        Set the default LogicValue to this Node.
+
+        Args:
+            value: The default LogicValue to set.
+        """
+        self._default_value = value
+
+    @property
+    def default_value(self) -> LogicValue:
+        """Return the current default LogicValue of this Node."""
+        return self._default_value
+
+    # --------------------------------------------------------------------------
+    # Resolved Value Handling (Simulator-Controlled)
     # --------------------------------------------------------------------------
 
     def set_resolved_value(self, value: LogicValue) -> None:
@@ -38,35 +56,12 @@ class Node:
         Args:
             value: The resolved LogicValue to set.
         """
-        self._value = value
+        self._resolved_value = value
 
     @property
-    def value(self) -> LogicValue:
+    def resolved_value(self) -> LogicValue:
         """Return the current resolved LogicValue of this Node."""
-        return self._value
-
-    # --------------------------------------------------------------------------
-    # Driver Management
-    # --------------------------------------------------------------------------
-
-    def add_driver(self, value: LogicValue) -> None:
-        """
-        Add a driver LogicValue to this Node.
-
-        Args:
-            value: The LogicValue driving this Node.
-        """
-        self._drivers.add(value)
-
-    def clear_drivers(self) -> None:
-        """Reset the Node to default Z driver and Z value."""
-        self._drivers.clear()
-        self._drivers.add(LogicValue.Z)
-        self._value = LogicValue.Z
-
-    def get_drivers(self) -> set[LogicValue]:
-        """Return all driver LogicValues as a set."""
-        return self._drivers
+        return self._resolved_value
 
     # --------------------------------------------------------------------------
     # Connectivity
@@ -74,13 +69,11 @@ class Node:
 
     def add_connection(self, other: Node) -> None:
         """INTERNAL USE ONLY: Add a direct connection to another Node."""
-        if other not in self._connections:
-            self._connections.append(other)
+        self._connections.add(other)
 
     def remove_connection(self, other: Node) -> None:
         """INTERNAL USE ONLY: Remove a direct connection to another Node."""
-        if other in self._connections:
-            self._connections.remove(other)
+        self._connections.discard(other)
 
     def connect(self, other: Node) -> None:
         """
@@ -108,8 +101,8 @@ class Node:
         self.remove_connection(other)
         other.remove_connection(self)
 
-    def get_connections(self) -> list[Node]:
-        """Return all directly connected Nodes as a list."""
+    def get_connections(self) -> set[Node]:
+        """Return all directly connected Nodes as a set."""
         return self._connections
 
     # --------------------------------------------------------------------------
@@ -118,4 +111,7 @@ class Node:
 
     def __repr__(self) -> str:
         """Return a debug representation of this Node."""
-        return f"<Node value={self._value!r} drivers={tuple(self._drivers)!r}>"
+        return (
+            f"<Node default_value={self._default_value!r} "
+            f"resolved_value={self._resolved_value!r}>"
+        )

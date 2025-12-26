@@ -22,12 +22,11 @@ class LogicDevice(ABC):
     injecting driver values and resolving all electrical behaviour.
     """
 
-    __slots__ = ("_node", "_value")
+    __slots__ = ("_node",)
 
     def __init__(self) -> None:
         """Create a new LogicDevice with a terminal Node and default Z value."""
         self._node = Node()
-        self._value = LogicValue.Z
 
     # --------------------------------------------------------------------------
     # Properties
@@ -39,9 +38,14 @@ class LogicDevice(ABC):
         return self._node
 
     @property
-    def value(self) -> LogicValue:
-        """Return the LogicValue driven by this LogicDevice."""
-        return self._value
+    def terminal_default_value(self) -> LogicValue:
+        """Return the default LogicValue of the terminal Node."""
+        return self._node.default_value
+
+    @property
+    def terminal_resolved_value(self) -> LogicValue:
+        """Return the resolved LogicValue of the terminal Node."""
+        return self._node.resolved_value
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -50,7 +54,10 @@ class LogicDevice(ABC):
     def __repr__(self) -> str:
         """Return a debug representation of this LogicDevice."""
         cls = self.__class__.__name__
-        return f"<{cls} value={self.value!r} terminal={self.terminal!r}>"
+        return (
+            f"<{cls} terminal_default_value={self._node.default_value!r} "
+            f"terminal_resolved_value={self.terminal_resolved_value!r}>"
+        )
 
 
 # ------------------------------------------------------------------------------
@@ -67,7 +74,7 @@ class VDD(LogicDevice):
 
     def __init__(self) -> None:
         super().__init__()
-        self._value = LogicValue.ONE
+        self._node.set_default_value(LogicValue.ONE)
 
 
 # ------------------------------------------------------------------------------
@@ -84,7 +91,7 @@ class GND(LogicDevice):
 
     def __init__(self) -> None:
         super().__init__()
-        self._value = LogicValue.ZERO
+        self._node.set_default_value(LogicValue.ZERO)
 
 
 # ------------------------------------------------------------------------------
@@ -101,7 +108,7 @@ class Input(LogicDevice):
 
     def set_value(self, value: LogicValue) -> None:
         """Set the LogicValue driven by this Input device."""
-        self._value = value
+        self._node.set_default_value(value)
 
 
 # ------------------------------------------------------------------------------
@@ -118,7 +125,7 @@ class Probe(LogicDevice):
 
     def sample(self) -> LogicValue:
         """Return the current resolved LogicValue of the terminal Node."""
-        return self._node.value
+        return self._node.resolved_value
 
 
 # ------------------------------------------------------------------------------

@@ -27,7 +27,7 @@ class Transistor(ABC):
     evaluation and node-group management is performed entirely by the Simulator.
     """
 
-    __slots__ = ("gate", "source", "drain")
+    __slots__ = ("_gate", "_source", "_drain")
 
     def __init__(self) -> None:
         """
@@ -35,9 +35,28 @@ class Transistor(ABC):
         All Nodes begin in high-impedance (Z) state with no drivers. These Nodes
         belong exclusively to this device and are never shared.
         """
-        self.gate: Node = Node()
-        self.source: Node = Node()
-        self.drain: Node = Node()
+        self._gate: Node = Node()
+        self._source: Node = Node()
+        self._drain: Node = Node()
+
+    # --------------------------------------------------------------------------
+    # Properties
+    # --------------------------------------------------------------------------
+
+    @property
+    def gate(self) -> Node:
+        """Return the gate Node of this Transistor."""
+        return self._gate
+
+    @property
+    def source(self) -> Node:
+        """Return the source Node of this Transistor."""
+        return self._source
+
+    @property
+    def drain(self) -> Node:
+        """Return the drain Node of this Transistor."""
+        return self._drain
 
     # --------------------------------------------------------------------------
     # Abstract Methods
@@ -64,7 +83,7 @@ class Transistor(ABC):
 
         Used by the Simulator for registration and structural traversal.
         """
-        return (self.gate, self.source, self.drain)
+        return (self._gate, self._source, self._drain)
 
     def conduction_nodes(self) -> tuple[Node, Node]:
         """
@@ -72,7 +91,7 @@ class Transistor(ABC):
 
         Used by the Simulator when establishing or removing connectivity.
         """
-        return (self.source, self.drain)
+        return (self._source, self._drain)
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -81,7 +100,7 @@ class Transistor(ABC):
     def __repr__(self) -> str:
         """Return a debug representation of this Transistor."""
         name = self.__class__.__name__
-        return f"<{name} gate={self.gate} source={self.source} drain={self.drain}>"
+        return f"<{name} gate={self._gate} source={self._source} drain={self._drain}>"
 
 
 # ------------------------------------------------------------------------------
@@ -99,7 +118,7 @@ class NMOS(Transistor):
     """
 
     def is_conducting(self) -> bool:
-        g = self.gate.value
+        g = self._gate.resolved_value
         return g is LogicValue.ONE
 
 
@@ -118,5 +137,5 @@ class PMOS(Transistor):
     """
 
     def is_conducting(self) -> bool:
-        g = self.gate.value
+        g = self._gate.resolved_value
         return g is LogicValue.ZERO

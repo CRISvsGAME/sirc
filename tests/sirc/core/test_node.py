@@ -9,10 +9,10 @@ from sirc.core.node import Node
 
 
 def test_node_initial_state():
-    """A new Node must have Z value, Z driver, and no connections."""
+    """A new Node must have Z default value, Z resolved value, and no connections."""
     n = Node()
-    assert n.value is LogicValue.Z  # Default Value
-    assert n.get_drivers() == {LogicValue.Z}  # Default Driver
+    assert n.default_value is LogicValue.Z  # Default Value
+    assert n.resolved_value is LogicValue.Z  # Resolved Value
     assert not n.get_connections()
 
 
@@ -25,80 +25,39 @@ def test_nodes_are_distinct():
 
 
 # ------------------------------------------------------------------------------
-# Value Handling Tests
+# Default Value Handling Tests
+# ------------------------------------------------------------------------------
+
+
+def test_set_default_value():
+    """Setting default value must update the Node's stored default value."""
+    n = Node()
+    n.set_default_value(LogicValue.ZERO)
+    assert n.default_value is LogicValue.ZERO
+    n.set_default_value(LogicValue.ONE)
+    assert n.default_value is LogicValue.ONE
+    n.set_default_value(LogicValue.Z)
+    assert n.default_value is LogicValue.Z
+    n.set_default_value(LogicValue.X)
+    assert n.default_value is LogicValue.X
+
+
+# ------------------------------------------------------------------------------
+# Resolved Value Handling Tests
 # ------------------------------------------------------------------------------
 
 
 def test_set_resolved_value():
-    """Setting resolved value must update the Node's stored value."""
+    """Setting resolved value must update the Node's stored resolved value."""
     n = Node()
     n.set_resolved_value(LogicValue.ZERO)
-    assert n.value is LogicValue.ZERO
+    assert n.resolved_value is LogicValue.ZERO
     n.set_resolved_value(LogicValue.ONE)
-    assert n.value is LogicValue.ONE
+    assert n.resolved_value is LogicValue.ONE
     n.set_resolved_value(LogicValue.Z)
-    assert n.value is LogicValue.Z
+    assert n.resolved_value is LogicValue.Z
     n.set_resolved_value(LogicValue.X)
-    assert n.value is LogicValue.X
-
-
-# ------------------------------------------------------------------------------
-# Driver Management Tests
-# ------------------------------------------------------------------------------
-
-
-def test_add_driver():
-    """add_driver() must append drivers in set."""
-    n = Node()
-    n.add_driver(LogicValue.ZERO)
-    n.add_driver(LogicValue.ONE)
-    n.add_driver(LogicValue.X)
-    n.add_driver(LogicValue.Z)
-    assert n.get_drivers() == {
-        LogicValue.Z,  # Default Driver
-        LogicValue.ZERO,
-        LogicValue.ONE,
-        LogicValue.X,
-        LogicValue.Z,
-    }
-
-
-def test_add_many_drivers():
-    """add_driver() must handle many drivers."""
-    count = 1000000
-    n = Node()
-    for _ in range(count):
-        n.add_driver(LogicValue.ZERO)
-    assert len(n.get_drivers()) == 2  # Including Default Driver
-
-
-def test_clear_drivers():
-    """clear_drivers() must reset the Node to default Z driver and Z value."""
-    n = Node()
-    n.add_driver(LogicValue.ZERO)
-    n.add_driver(LogicValue.ONE)
-    n.add_driver(LogicValue.X)
-    n.add_driver(LogicValue.Z)
-    n.clear_drivers()
-    assert n.get_drivers() == {LogicValue.Z}  # Default Driver
-
-
-def test_get_drivers():
-    """get_drivers() must return a set."""
-    n = Node()
-    n.add_driver(LogicValue.ZERO)
-    n.add_driver(LogicValue.ONE)
-    n.add_driver(LogicValue.X)
-    n.add_driver(LogicValue.Z)
-    drivers = n.get_drivers()
-    assert isinstance(drivers, set)
-    assert drivers == {
-        LogicValue.Z,  # Default Driver
-        LogicValue.ZERO,
-        LogicValue.ONE,
-        LogicValue.X,
-        LogicValue.Z,
-    }
+    assert n.resolved_value is LogicValue.X
 
 
 # ------------------------------------------------------------------------------
@@ -123,8 +82,8 @@ def test_connect_no_duplicates():
     b = Node()
     a.connect(b)
     b.connect(a)
-    assert a.get_connections() == [b]
-    assert b.get_connections() == [a]
+    assert a.get_connections() == {b}
+    assert b.get_connections() == {a}
 
 
 def test_connect_self_noop():
@@ -173,13 +132,13 @@ def test_remove_connection_internal_only():
 
 
 def test_get_connections():
-    """get_connections() must return a ."""
+    """get_connections() must return a set."""
     a = Node()
     b = Node()
     a.connect(b)
     connections = a.get_connections()
-    assert isinstance(connections, list)
-    assert connections == [b]
+    assert isinstance(connections, set)
+    assert connections == {b}
 
 
 def test_isolated_node_connections():
@@ -199,20 +158,19 @@ def test_isolated_node_connections():
 
 
 def test_repr_contains_value_and_drivers():
-    """__repr__ must include value and drivers"""
+    """__repr__ must include default and resolved values."""
     n = Node()
-    n.add_driver(LogicValue.ONE)
+    n.set_resolved_value(LogicValue.ONE)
     r = repr(n)
     assert "Node" in r
-    assert "value=LogicValue.Z" in r
-    assert "LogicValue.Z" in r
-    assert "LogicValue.ONE" in r
+    assert "default_value=LogicValue.Z" in r
+    assert "resolved_value=LogicValue.ONE" in r
 
 
 def test_repr_format():
     """__repr__ must have correct format."""
     n = Node()
-    n.add_driver(LogicValue.ONE)
+    n.set_resolved_value(LogicValue.ONE)
     r = repr(n)
     assert r.startswith("<Node ")
     assert r.endswith(">")

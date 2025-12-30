@@ -13,14 +13,14 @@ from sirc.core.device import VDD, GND, Input, Probe, Port
 def test_vdd_default_state():
     """VDD must drive LogicValue.ONE."""
     v = VDD()
-    assert v.value is LogicValue.ONE
+    assert v.terminal_default_value is LogicValue.ONE
     assert isinstance(v.terminal, Node)
 
 
 def test_gnd_default_state():
     """GND must drive LogicValue.ZERO."""
     g = GND()
-    assert g.value is LogicValue.ZERO
+    assert g.terminal_default_value is LogicValue.ZERO
     assert isinstance(g.terminal, Node)
 
 
@@ -39,7 +39,7 @@ def test_vdd_and_gnd_nodes_are_unique():
 def test_input_default_state():
     """Input must default to driving LogicValue.Z."""
     i = Input()
-    assert i.value is LogicValue.Z
+    assert i.terminal_default_value is LogicValue.Z
     assert isinstance(i.terminal, Node)
 
 
@@ -47,13 +47,13 @@ def test_input_set_value_updates_value():
     """Input must drive the value set by set_value()."""
     i = Input()
     i.set_value(LogicValue.ONE)
-    assert i.value is LogicValue.ONE
+    assert i.terminal_default_value is LogicValue.ONE
     i.set_value(LogicValue.ZERO)
-    assert i.value is LogicValue.ZERO
+    assert i.terminal_default_value is LogicValue.ZERO
     i.set_value(LogicValue.X)
-    assert i.value is LogicValue.X
+    assert i.terminal_default_value is LogicValue.X
     i.set_value(LogicValue.Z)
-    assert i.value is LogicValue.Z
+    assert i.terminal_default_value is LogicValue.Z
 
 
 def test_input_terminal_node_is_unique():
@@ -71,7 +71,7 @@ def test_input_terminal_node_is_unique():
 def test_probe_default_state():
     """Probe must default to driving LogicValue.Z."""
     p = Probe()
-    assert p.value is LogicValue.Z
+    assert p.terminal_default_value is LogicValue.Z
     assert isinstance(p.terminal, Node)
 
 
@@ -104,7 +104,7 @@ def test_probe_terminal_node_is_unique():
 def test_port_default_state():
     """Port must default to driving LogicValue.Z."""
     p = Port()
-    assert p.value is LogicValue.Z
+    assert p.terminal_default_value is LogicValue.Z
     assert isinstance(p.terminal, Node)
 
 
@@ -122,10 +122,10 @@ def test_port_terminal_node_is_unique():
 
 @pytest.mark.parametrize("device_class", [VDD, GND, Input, Probe, Port])
 def test_repr_contains_class_value_terminal_info(device_class: type):
-    """__repr__ must include class name, value, and terminal information."""
+    """__repr__ must include class name and terminal information."""
     d = device_class()
     r = repr(d)
     assert r.startswith(f"<{device_class.__name__} ")
-    assert "value=" in r
-    assert "terminal=" in r
+    assert "terminal_default_value=" in r
+    assert "terminal_resolved_value=" in r
     assert r.endswith(">")

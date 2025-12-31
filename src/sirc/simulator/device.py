@@ -8,11 +8,19 @@ paths, and propagate LogicValues across connected node-groups.
 """
 
 from __future__ import annotations
+from dataclasses import dataclass, field
 from typing import Iterable
 from sirc.core.logic import LogicValue
 from sirc.core.node import Node
 from sirc.core.device import LogicDevice
 from sirc.core.transistor import Transistor
+
+
+@dataclass(eq=False)
+class NodeComponent:
+    """Node Component"""
+
+    nodes: set[Node] = field(default_factory=set[Node])
 
 
 class DeviceSimulator:
@@ -27,9 +35,16 @@ class DeviceSimulator:
 
     def __init__(self) -> None:
         """SIRC"""
-        self.devices: list[LogicDevice] = []
-        self.transistors: list[Transistor] = []
-        self.nodes: list[Node] = []
+        self._devices: set[LogicDevice] = set()
+        self._nodes: set[Node] = set()
+        self._node_components: set[NodeComponent] = set()
+        self._dirty_node_components: set[NodeComponent] = set()
+        self._find_node_component: dict[Node, NodeComponent] = {}
+        self._gates: set[Node] = set()
+        self._transistors: set[Transistor] = set()
+        self._dirty_transistors: set[Transistor] = set()
+        self._find_transistor: dict[Node, Transistor] = {}
+        self._dirty: bool = True
 
     # --------------------------------------------------------------------------
     # Device Registration
@@ -42,8 +57,8 @@ class DeviceSimulator:
         Args:
             device: The LogicDevice to register.
         """
-        self.devices.append(device)
-        self.nodes.append(device.terminal)
+        self._devices.add(device)
+        self._nodes.add(device.terminal)
 
     def register_devices(self, devices: Iterable[LogicDevice]) -> None:
         """
@@ -62,8 +77,10 @@ class DeviceSimulator:
         Args:
             transistor: The Transistor to register.
         """
-        self.transistors.append(transistor)
-        self.nodes.extend(transistor.terminals())
+        self._transistors.add(transistor)
+        self._nodes.update(transistor.terminals())
+        self._gates.add(transistor.gate)
+        self._find_transistor[transistor.gate] = transistor
 
     def register_transistors(self, transistors: Iterable[Transistor]) -> None:
         """
@@ -82,8 +99,8 @@ class DeviceSimulator:
         Args:
             device: The LogicDevice to unregister.
         """
-        self.devices.remove(device)
-        self.nodes.remove(device.terminal)
+        self._devices.discard(device)
+        self._nodes.discard(device.terminal)
 
     def unregister_devices(self, devices: Iterable[LogicDevice]) -> None:
         """
@@ -102,9 +119,10 @@ class DeviceSimulator:
         Args:
             transistor: The Transistor to unregister.
         """
-        self.transistors.remove(transistor)
-        for terminal in transistor.terminals():
-            self.nodes.remove(terminal)
+        self._transistors.discard(transistor)
+        self._nodes.difference_update(transistor.terminals())
+        self._gates.discard(transistor.gate)
+        self._find_transistor.pop(transistor.gate, None)
 
     def unregister_transistors(self, transistors: Iterable[Transistor]) -> None:
         """
@@ -115,6 +133,19 @@ class DeviceSimulator:
         """
         for transistor in transistors:
             self.unregister_transistor(transistor)
+
+    # --------------------------------------------------------------------------
+    # Topology Management
+    # --------------------------------------------------------------------------
+
+    def build_topology(self) -> None:
+        """Build Topology"""
+        self._node_components: set[NodeComponent] = set()
+        self._dirty_node_components: set[NodeComponent] = set()
+        self._find_node_component: dict[Node, NodeComponent] = {}
+        self._dirty_transistors: set[Transistor] = set()
+        self._dirty: bool = True
+        self._build_node_components()
 
     # --------------------------------------------------------------------------
     # Logical Connection
@@ -144,26 +175,17 @@ class DeviceSimulator:
     # Simulation Execution
     # --------------------------------------------------------------------------
 
-    def _dfs(self, collection: Iterable[Node]) -> list[list[Node]]:
-        """
-        Perform depth-first search to identify connected node-groups.
-
-        Args:
-            collection: Iterable of Nodes to explore.
-
-        Returns:
-            List of lists, each containing Nodes in a connected group.
-        """
+    def _build_node_components(self) -> None:
+        """Build Node Components"""
         visited: set[Node] = set()
         stack: list[Node] = []
-        groups: list[list[Node]] = []
 
-        for start in collection:
+        for start in self._nodes:
             if start in visited:
                 continue
 
             stack.append(start)
-            group: list[Node] = []
+            comp: NodeComponent = NodeComponent()
 
             while stack:
                 node = stack.pop()
@@ -172,68 +194,93 @@ class DeviceSimulator:
                     continue
 
                 visited.add(node)
-                group.append(node)
+                comp.nodes.add(node)
+                self._find_node_component[node] = comp
 
                 for neighbor in node.get_connections():
                     if neighbor not in visited:
                         stack.append(neighbor)
 
-            groups.append(group)
+            self._node_components.add(comp)
+            self._dirty_node_components.add(comp)
 
-        return groups
-
-    def _resolve_groups(self, groups: list[list[Node]]) -> None:
-        """
-        Resolve LogicValues for each connected node-group.
-
-        Args:
-            groups: List of node-groups to resolve.
-        """
-        for group in groups:
+    def _resolve_node_components(self) -> None:
+        """Resolve Node Components"""
+        for group in self._dirty_node_components:
             drivers: set[LogicValue] = set()
 
-            for node in group:
-                drivers.update(node.get_drivers())
+            for node in group.nodes:
+                drivers.add(node.default_value)
 
             resolved_value: LogicValue = LogicValue.resolve_all(drivers)
 
-            for node in group:
+            for node in group.nodes:
+                if node in self._gates and resolved_value is not node.resolved_value:
+                    self._dirty_transistors.add(self._find_transistor[node])
+
                 node.set_resolved_value(resolved_value)
 
+        self._dirty_node_components.clear()
+
+    def _update_transistor_connections(self) -> None:
+        """Update Transistor Connections"""
+        for transistor in self._dirty_transistors:
+            a, b = transistor.conduction_nodes()
+
+            if transistor.is_conducting():
+                a.connect(b)
+            else:
+                a.disconnect(b)
+
+            self._dirty_node_components.add(self._find_node_component[a])
+            self._dirty_node_components.add(self._find_node_component[b])
+
+        self._dirty_transistors.clear()
+
+    def _update_node_components(self) -> None:
+        """Update Node Components"""
+        groups_to_update: list[NodeComponent] = []
+        groups_to_remove: list[NodeComponent] = []
+        visited: set[Node] = set()
+        stack: list[Node] = []
+
+        for group in self._dirty_node_components:
+            for start in group.nodes:
+                if start in visited:
+                    continue
+
+                stack.append(start)
+                comp: NodeComponent = NodeComponent()
+
+                while stack:
+                    node = stack.pop()
+
+                    if node in visited:
+                        continue
+
+                    visited.add(node)
+                    comp.nodes.add(node)
+                    self._find_node_component[node] = comp
+
+                    for neighbor in node.get_connections():
+                        if neighbor not in visited:
+                            stack.append(neighbor)
+
+                groups_to_update.append(comp)
+
+            groups_to_remove.append(group)
+
+        self._node_components.difference_update(groups_to_remove)
+        self._node_components.update(groups_to_update)
+        self._dirty_node_components.clear()
+        self._dirty_node_components.update(groups_to_update)
+
+        if not groups_to_update:
+            self._dirty = False
+
     def tick(self) -> None:
-        """
-        Execute a simulation tick to update device states and connectivity.
-
-        This method performs the following steps:
-            1. Clears all Node drivers.
-            2. Applies LogicDevice outputs to their terminal Nodes.
-            3. Repeatedly:
-                a. Identifies connected node-groups via DFS.
-                b. Resolves LogicValues for each group.
-                c. Updates transistor conduction paths.
-            4. Continues until a fixed-point state is reached.
-        """
-        for node in self.nodes:
-            node.clear_drivers()
-
-        for device in self.devices:
-            device.terminal.add_driver(device.value)
-
-        while True:
-            groups = self._dfs(self.nodes)
-            self._resolve_groups(groups)
-            fixed_point = True
-
-            for transistor in self.transistors:
-                a, b = transistor.conduction_nodes()
-                if transistor.is_conducting():
-                    if a not in b.get_connections():
-                        transistor.source.connect(transistor.drain)
-                        fixed_point = False
-                else:
-                    if a in b.get_connections():
-                        transistor.source.disconnect(transistor.drain)
-                        fixed_point = False
-
-            if fixed_point:
-                break
+        """Tick"""
+        while self._dirty:
+            self._resolve_node_components()
+            self._update_transistor_connections()
+            self._update_node_components()

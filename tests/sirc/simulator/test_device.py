@@ -14,9 +14,9 @@ from sirc.core.transistor import Transistor, NMOS, PMOS
 def test_simulator_initial_state():
     """Simulator must start with no devices, no transistors, and no nodes."""
     sim = DeviceSimulator()
-    assert not sim.devices
-    assert not sim.transistors
-    assert not sim.nodes
+    assert not sim._devices
+    assert not sim._transistors
+    assert not sim._nodes
 
 
 # ------------------------------------------------------------------------------
@@ -29,8 +29,8 @@ def test_register_single_device():
     sim = DeviceSimulator()
     vdd = VDD()
     sim.register_device(vdd)
-    assert vdd in sim.devices
-    assert vdd.terminal in sim.nodes
+    assert vdd in sim._devices
+    assert vdd.terminal in sim._nodes
 
 
 def test_register_multiple_devices():
@@ -39,8 +39,8 @@ def test_register_multiple_devices():
     devices: list[LogicDevice] = [VDD(), GND(), Input(), Probe(), Port()]
     sim.register_devices(devices)
     for d in devices:
-        assert d in sim.devices
-        assert d.terminal in sim.nodes
+        assert d in sim._devices
+        assert d.terminal in sim._nodes
 
 
 def test_unregister_signle_device():
@@ -49,8 +49,8 @@ def test_unregister_signle_device():
     gnd = GND()
     sim.register_device(gnd)
     sim.unregister_device(gnd)
-    assert gnd not in sim.devices
-    assert gnd.terminal not in sim.nodes
+    assert gnd not in sim._devices
+    assert gnd.terminal not in sim._nodes
 
 
 def test_unregister_multiple_devices():
@@ -60,8 +60,8 @@ def test_unregister_multiple_devices():
     sim.register_devices(devices)
     sim.unregister_devices(devices)
     for d in devices:
-        assert d not in sim.devices
-        assert d.terminal not in sim.nodes
+        assert d not in sim._devices
+        assert d.terminal not in sim._nodes
 
 
 def test_register_single_transistor():
@@ -69,10 +69,10 @@ def test_register_single_transistor():
     sim = DeviceSimulator()
     nmos = NMOS()
     sim.register_transistor(nmos)
-    assert nmos in sim.transistors
-    assert nmos.gate in sim.nodes
-    assert nmos.source in sim.nodes
-    assert nmos.drain in sim.nodes
+    assert nmos in sim._transistors
+    assert nmos.gate in sim._nodes
+    assert nmos.source in sim._nodes
+    assert nmos.drain in sim._nodes
 
 
 def test_register_multiple_transistors():
@@ -81,10 +81,10 @@ def test_register_multiple_transistors():
     transistors: list[Transistor] = [NMOS(), PMOS()]
     sim.register_transistors(transistors)
     for t in transistors:
-        assert t in sim.transistors
-        assert t.gate in sim.nodes
-        assert t.source in sim.nodes
-        assert t.drain in sim.nodes
+        assert t in sim._transistors
+        assert t.gate in sim._nodes
+        assert t.source in sim._nodes
+        assert t.drain in sim._nodes
 
 
 def test_unregister_single_transistor():
@@ -93,10 +93,10 @@ def test_unregister_single_transistor():
     pmos = PMOS()
     sim.register_transistor(pmos)
     sim.unregister_transistor(pmos)
-    assert pmos not in sim.transistors
-    assert pmos.gate not in sim.nodes
-    assert pmos.source not in sim.nodes
-    assert pmos.drain not in sim.nodes
+    assert pmos not in sim._transistors
+    assert pmos.gate not in sim._nodes
+    assert pmos.source not in sim._nodes
+    assert pmos.drain not in sim._nodes
 
 
 def test_unregister_multiple_transistors():
@@ -106,10 +106,10 @@ def test_unregister_multiple_transistors():
     sim.register_transistors(transistors)
     sim.unregister_transistors(transistors)
     for t in transistors:
-        assert t not in sim.transistors
-        assert t.gate not in sim.nodes
-        assert t.source not in sim.nodes
-        assert t.drain not in sim.nodes
+        assert t not in sim._transistors
+        assert t.gate not in sim._nodes
+        assert t.source not in sim._nodes
+        assert t.drain not in sim._nodes
 
 
 # ------------------------------------------------------------------------------
@@ -151,9 +151,11 @@ def test_tick_with_simple_devices():
     sim.register_devices([inp, probe])
     sim.connect(inp.terminal, probe.terminal)
     inp.set_value(LogicValue.ONE)
+    sim.build_topology()
     sim.tick()
     assert probe.sample() is LogicValue.ONE
     inp.set_value(LogicValue.ZERO)
+    sim.build_topology()
     sim.tick()
     assert probe.sample() is LogicValue.ZERO
 
@@ -186,9 +188,11 @@ def test_tick_cmos_inverter():
     sim.connect(out_port.terminal, probe.terminal)
     # Input = 0 → Probe = 1
     inp.set_value(LogicValue.ZERO)
+    sim.build_topology()
     sim.tick()
     assert probe.sample() is LogicValue.ONE
     # Input = 1 → Probe = 0
     inp.set_value(LogicValue.ONE)
+    sim.build_topology()
     sim.tick()
     assert probe.sample() is LogicValue.ZERO

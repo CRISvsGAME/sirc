@@ -70,10 +70,12 @@ def main(n: int = 1000):
     sim.connect(current_node, probe.terminal)
 
     inp.set_value(LogicValue.ONE)
+    sim.build_topology()
     sim.tick()
     print("Input = 1 → Output =", probe.sample())
 
     inp.set_value(LogicValue.ZERO)
+    sim.build_topology()
     sim.tick()
     print("Input = 0 → Output =", probe.sample())
 

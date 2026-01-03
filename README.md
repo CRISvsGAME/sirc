@@ -63,11 +63,13 @@ sim.connect(out_port.terminal, probe.terminal)
 
 # Simulate and Sample Output
 inp.set_value(LogicValue.ONE)
+sim.build_topology()
 sim.tick()
 print(repr(probe.sample()))
 
 # Change Input and Resimulate
 inp.set_value(LogicValue.ZERO)
+sim.build_topology()
 sim.tick()
 print(repr(probe.sample()))
 ```
@@ -113,6 +115,8 @@ src/
             transistor.py
         simulator/
             device.py
+stats/
+    main.py
 tests/
     sirc/
         core/

@@ -1,7 +1,7 @@
 """Unit tests for sirc.core.logic module."""
 
 import pytest
-from sirc.core.logic import LogicValue
+from sirc.core import LogicValue
 
 # ------------------------------------------------------------------------------
 # State Property Tests

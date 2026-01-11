@@ -2,30 +2,47 @@
 SIRC Core Node Module.
 
 Defines the Node class used by the SIRC simulation engine. Nodes represent
-logical connection points in the circuit. Multiple Nodes may be connected,
-forming an electrical group that collectively resolves a single LogicValue.
+logical connection points in the circuit. Connectivity between Nodes is owned
+and managed by the Simulator, which groups Nodes to resolve LogicValues.
 """
 
 from __future__ import annotations
-from sirc.core.logic import LogicValue
+from enum import IntEnum
+from sirc.core import LogicValue
+
+
+class NodeKind(IntEnum):
+    """Node Kind"""
+
+    BASE = 0
+    GATE = 1
+
+    def __str__(self) -> str:
+        """Return compact string form ('0', '1')."""
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        """Return readable debug representation."""
+        return f"NodeKind.{self.name}"
 
 
 class Node:
     """
     A Node is a passive logical connection point in the SIRC circuit model.
 
-    A Node holds one default LogicValue and may be directly connected
-    to other Nodes. A Node performs no resolution or computation by itself;
+    A Node holds one default LogicValue and participates in connectivity managed
+    by the Simulator. A Node performs no resolution or computation by itself;
     all evaluation and propagation are handled entirely by the Simulator.
     """
 
-    __slots__ = ("_default_value", "_resolved_value", "_connections")
+    __slots__ = ("_id", "_kind", "_default_value", "_resolved_value")
 
-    def __init__(self) -> None:
-        """Create an isolated Node with default LogicValue Z."""
+    def __init__(self, node_id: int, kind: NodeKind = NodeKind.BASE) -> None:
+        """Create a Node with default and resolved LogicValue set to Z."""
+        self._id: int = node_id
+        self._kind: NodeKind = kind
         self._default_value: LogicValue = LogicValue.Z
         self._resolved_value: LogicValue = LogicValue.Z
-        self._connections: set[Node] = set()
 
     # --------------------------------------------------------------------------
     # Default Value Handling (Device-Controlled)
@@ -64,46 +81,18 @@ class Node:
         return self._resolved_value
 
     # --------------------------------------------------------------------------
-    # Connectivity
+    # Properties
     # --------------------------------------------------------------------------
 
-    def add_connection(self, other: Node) -> None:
-        """INTERNAL USE ONLY: Add a direct connection to another Node."""
-        self._connections.add(other)
+    @property
+    def id(self) -> int:
+        """Return the unique identifier of this Node."""
+        return self._id
 
-    def remove_connection(self, other: Node) -> None:
-        """INTERNAL USE ONLY: Remove a direct connection to another Node."""
-        self._connections.discard(other)
-
-    def connect(self, other: Node) -> None:
-        """
-        Create a bidirectional connection between this Node and another.
-
-        Args:
-            other: The Node to connect to.
-        """
-        if self is other:
-            return
-
-        self.add_connection(other)
-        other.add_connection(self)
-
-    def disconnect(self, other: Node) -> None:
-        """
-        Remove the bidirectional connection between this Node and another.
-
-        Args:
-            other: The Node to disconnect from.
-        """
-        if self is other:
-            return
-
-        self.remove_connection(other)
-        other.remove_connection(self)
-
-    def get_connections(self) -> set[Node]:
-        """Return all directly connected Nodes as a set."""
-        return self._connections
+    @property
+    def kind(self) -> NodeKind:
+        """Return the kind of this Node."""
+        return self._kind
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -112,6 +101,7 @@ class Node:
     def __repr__(self) -> str:
         """Return a debug representation of this Node."""
         return (
-            f"<Node default_value={self._default_value!r} "
+            f"<Node id={self._id} kind={self._kind!r} "
+            f"default_value={self._default_value!r} "
             f"resolved_value={self._resolved_value!r}>"
         )

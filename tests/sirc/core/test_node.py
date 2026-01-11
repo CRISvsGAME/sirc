@@ -1,25 +1,29 @@
 """Unit tests for sirc.core.node module."""
 
-from sirc.core.logic import LogicValue
-from sirc.core.node import Node
+from sirc.core import LogicValue, Node, NodeKind
 
 # ------------------------------------------------------------------------------
 # Construction Tests
 # ------------------------------------------------------------------------------
 
 
+def test_node_kind_default():
+    """A new Node must have the default kind of BASE."""
+    n = Node(1)
+    assert n.kind == NodeKind.BASE
+
+
 def test_node_initial_state():
-    """A new Node must have Z default value, Z resolved value, and no connections."""
-    n = Node()
+    """A new Node must have LogicValue Z default and resolved value"""
+    n = Node(1)
     assert n.default_value is LogicValue.Z  # Default Value
     assert n.resolved_value is LogicValue.Z  # Resolved Value
-    assert not n.get_connections()
 
 
 def test_nodes_are_distinct():
     """Different Nodes must be distinct instances."""
-    a = Node()
-    b = Node()
+    a = Node(1)
+    b = Node(2)
     assert a is not b
     assert a != b
 
@@ -31,7 +35,7 @@ def test_nodes_are_distinct():
 
 def test_set_default_value():
     """Setting default value must update the Node's stored default value."""
-    n = Node()
+    n = Node(1)
     n.set_default_value(LogicValue.ZERO)
     assert n.default_value is LogicValue.ZERO
     n.set_default_value(LogicValue.ONE)
@@ -49,7 +53,7 @@ def test_set_default_value():
 
 def test_set_resolved_value():
     """Setting resolved value must update the Node's stored resolved value."""
-    n = Node()
+    n = Node(1)
     n.set_resolved_value(LogicValue.ZERO)
     assert n.resolved_value is LogicValue.ZERO
     n.set_resolved_value(LogicValue.ONE)
@@ -61,115 +65,25 @@ def test_set_resolved_value():
 
 
 # ------------------------------------------------------------------------------
-# Connectivity Tests
-# ------------------------------------------------------------------------------
-
-
-def test_connect_bidirectional():
-    """connect() must create symmetric connections."""
-    a = Node()
-    b = Node()
-    a.connect(b)
-    assert a in b.get_connections()
-    assert b in a.get_connections()
-    assert len(a.get_connections()) == 1
-    assert len(b.get_connections()) == 1
-
-
-def test_connect_no_duplicates():
-    """connect() must not create duplicate connections."""
-    a = Node()
-    b = Node()
-    a.connect(b)
-    b.connect(a)
-    assert a.get_connections() == {b}
-    assert b.get_connections() == {a}
-
-
-def test_connect_self_noop():
-    """Connecting a Node to itself must do nothing."""
-    n = Node()
-    n.connect(n)
-    assert not n.get_connections()
-
-
-def test_disconnect_bidirectional():
-    """disconnect() must remove symmetric connections."""
-    a = Node()
-    b = Node()
-    a.connect(b)
-    b.disconnect(a)
-    assert not a.get_connections()
-    assert not b.get_connections()
-
-
-def test_disconnect_self_noop():
-    """Disconnecting a Node from itself must do nothing."""
-    n = Node()
-    n.disconnect(n)
-    assert not n.get_connections()
-
-
-def test_add_connection_internal_only():
-    """add_connection() must add a one-way connection."""
-    a = Node()
-    b = Node()
-    a.add_connection(b)
-    assert b in a.get_connections()
-    assert a not in b.get_connections()
-    assert len(a.get_connections()) == 1
-    assert len(b.get_connections()) == 0
-
-
-def test_remove_connection_internal_only():
-    """remove_connection() must remove a one-way connection."""
-    a = Node()
-    b = Node()
-    a.add_connection(b)
-    a.remove_connection(b)
-    assert not a.get_connections()
-    assert not b.get_connections()
-
-
-def test_get_connections():
-    """get_connections() must return a set."""
-    a = Node()
-    b = Node()
-    a.connect(b)
-    connections = a.get_connections()
-    assert isinstance(connections, set)
-    assert connections == {b}
-
-
-def test_isolated_node_connections():
-    """An isolated Node must have no connections."""
-    a = Node()
-    b = Node()
-    c = Node()
-    a.connect(b)
-    assert c not in a.get_connections()
-    assert c not in b.get_connections()
-    assert not c.get_connections()
-
-
-# ------------------------------------------------------------------------------
 # Debug Representation Tests
 # ------------------------------------------------------------------------------
 
 
-def test_repr_contains_value_and_drivers():
+def test_repr_contains_default_and_resolved_values():
     """__repr__ must include default and resolved values."""
-    n = Node()
+    n = Node(1)
     n.set_resolved_value(LogicValue.ONE)
     r = repr(n)
     assert "Node" in r
+    assert "id=1" in r
+    assert "kind=NodeKind.BASE" in r
     assert "default_value=LogicValue.Z" in r
     assert "resolved_value=LogicValue.ONE" in r
 
 
 def test_repr_format():
     """__repr__ must have correct format."""
-    n = Node()
+    n = Node(1)
     n.set_resolved_value(LogicValue.ONE)
     r = repr(n)
     assert r.startswith("<Node ")

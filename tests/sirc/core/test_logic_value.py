@@ -1,4 +1,4 @@
-"""Unit tests for sirc.core.logic module."""
+"""Unit tests for LogicValue module."""
 
 import pytest
 from sirc.core import LogicValue

@@ -1,5 +1,5 @@
+from .logic_value import LogicValue as LogicValue
 from enum import IntEnum
-from sirc.core import LogicValue as LogicValue
 
 class NodeKind(IntEnum):
     BASE = 0

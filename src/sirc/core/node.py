@@ -8,7 +8,7 @@ and managed by the Simulator, which groups Nodes to resolve LogicValues.
 
 from __future__ import annotations
 from enum import IntEnum
-from sirc.core import LogicValue
+from .logic_value import LogicValue
 
 
 class NodeKind(IntEnum):

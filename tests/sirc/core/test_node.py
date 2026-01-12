@@ -1,4 +1,4 @@
-"""Unit tests for sirc.core.node module."""
+"""Unit tests for Node module."""
 
 from sirc.core import LogicValue, Node, NodeKind
 

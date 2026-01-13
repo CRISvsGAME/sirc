@@ -1,8 +1,7 @@
-"""Unit tests for sirc.core.transistor module."""
+"""Unit tests for Transistor module."""
 
-from sirc.core.logic import LogicValue
-from sirc.core.node import Node
-from sirc.core.transistor import Transistor, NMOS, PMOS
+import pytest
+from sirc.core import LogicValue, Node, NodeKind, Transistor, NMOS, PMOS
 
 # ------------------------------------------------------------------------------
 # Transistor Construction Tests
@@ -11,13 +10,52 @@ from sirc.core.transistor import Transistor, NMOS, PMOS
 
 def test_transistor_has_three_distinct_nodes():
     """Each Transistor must have unique gate, source, and drain Nodes."""
-    t = NMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = NMOS(1, g, s, d)
     assert isinstance(t.gate, Node)
     assert isinstance(t.source, Node)
     assert isinstance(t.drain, Node)
     assert t.gate is not t.source
     assert t.gate is not t.drain
     assert t.source is not t.drain
+
+
+def test_transistor_rejects_non_gate_node_as_gate():
+    """Transistor must raise TypeError if gate Node is not kind=GATE."""
+    g = Node(1)  # BASE Default
+    s = Node(2)
+    d = Node(3)
+    with pytest.raises(TypeError):
+        NMOS(1, g, s, d)
+    with pytest.raises(TypeError):
+        PMOS(2, g, s, d)
+
+
+def test_transistor_rejects_gate_used_as_conduction_node():
+    """Transistor must raise TypeError if source or drain Node is kind=GATE."""
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2, kind=NodeKind.GATE)
+    d = Node(3)
+    with pytest.raises(TypeError):
+        NMOS(1, g, s, d)
+    with pytest.raises(TypeError):
+        PMOS(2, g, s, d)
+    with pytest.raises(TypeError):
+        NMOS(3, g, d, s)
+    with pytest.raises(TypeError):
+        PMOS(4, g, d, s)
+
+
+def test_transistor_rejects_shared_nodes():
+    """Transistor must raise ValueError if gate, source, and drain Nodes are not distinct."""
+    g = Node(1, kind=NodeKind.GATE)
+    n = Node(2)
+    with pytest.raises(ValueError):
+        NMOS(1, g, n, n)
+    with pytest.raises(ValueError):
+        PMOS(1, g, n, n)
 
 
 # ------------------------------------------------------------------------------
@@ -27,7 +65,10 @@ def test_transistor_has_three_distinct_nodes():
 
 def test_terminals_returns_gate_source_drain():
     """terminals() must return (gate, source, drain) Nodes in order."""
-    t = NMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = NMOS(1, g, s, d)
     g, s, d = t.terminals()
     assert g is t.gate
     assert s is t.source
@@ -36,7 +77,10 @@ def test_terminals_returns_gate_source_drain():
 
 def test_conduction_nodes_returns_source_and_drain():
     """conduction_nodes() must return (source, drain) Nodes in order."""
-    t = PMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = PMOS(1, g, s, d)
     s, d = t.conduction_nodes()
     assert s is t.source
     assert d is t.drain
@@ -49,7 +93,10 @@ def test_conduction_nodes_returns_source_and_drain():
 
 def test_nmos_conduction_rules():
     """NMOS must conduct only when gate is LogicValue.ONE."""
-    t = NMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = NMOS(1, g, s, d)
     # Gate = 0 → off
     t.gate.set_resolved_value(LogicValue.ZERO)
     assert not t.is_conducting()
@@ -71,7 +118,10 @@ def test_nmos_conduction_rules():
 
 def test_pmos_conduction_rules():
     """PMOS must conduct only when gate is LogicValue.ZERO."""
-    t = PMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = PMOS(1, g, s, d)
     # Gate = 0 → on
     t.gate.set_resolved_value(LogicValue.ZERO)
     assert t.is_conducting()
@@ -93,8 +143,14 @@ def test_pmos_conduction_rules():
 
 def test_nmos_and_pmos_share_same_interface():
     """NMOS and PMOS must both be Transistor subclasses with is_conducting()."""
-    nmos = NMOS()
-    pmos = PMOS()
+    ng = Node(1, kind=NodeKind.GATE)
+    ns = Node(2)
+    nd = Node(3)
+    nmos = NMOS(1, ng, ns, nd)
+    pg = Node(4, kind=NodeKind.GATE)
+    ps = Node(5)
+    pd = Node(6)
+    pmos = PMOS(1, pg, ps, pd)
     assert isinstance(nmos, Transistor)
     assert isinstance(pmos, Transistor)
     assert hasattr(nmos, "is_conducting")
@@ -108,7 +164,10 @@ def test_nmos_and_pmos_share_same_interface():
 
 def test_nmos_repr_format():
     """NMOS __repr__ must include class name and terminal fields."""
-    t = NMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = NMOS(1, g, s, d)
     r = repr(t)
     assert "NMOS" in r
     assert "gate=" in r
@@ -120,7 +179,10 @@ def test_nmos_repr_format():
 
 def test_pmos_repr_format():
     """PMOS __repr__ must include class name and terminal fields."""
-    t = PMOS()
+    g = Node(1, kind=NodeKind.GATE)
+    s = Node(2)
+    d = Node(3)
+    t = PMOS(1, g, s, d)
     r = repr(t)
     assert "PMOS" in r
     assert "gate=" in r
@@ -137,8 +199,14 @@ def test_pmos_repr_format():
 
 def test_transistor_nodes_are_not_shared_between_instances():
     """Each Transistor instance must have its own unique Nodes."""
-    nmos = NMOS()
-    pmos = PMOS()
+    ng = Node(1, kind=NodeKind.GATE)
+    ns = Node(2)
+    nd = Node(3)
+    nmos = NMOS(1, ng, ns, nd)
+    pg = Node(4, kind=NodeKind.GATE)
+    ps = Node(5)
+    pd = Node(6)
+    pmos = PMOS(1, pg, ps, pd)
     assert nmos.gate is not pmos.gate
     assert nmos.source is not pmos.source
     assert nmos.drain is not pmos.drain
@@ -150,8 +218,11 @@ def test_transistor_nodes_are_not_shared_between_instances():
 
 
 def test_multiple_transistors_construction():
-    """Creating many Transistor instances must yield unique Nodes."""
-    ts = [NMOS() for _ in range(1000)]
+    """Creating many Transistor instances must preserve node identity uniqueness."""
+    ts = [
+        NMOS(i, Node(i * 3 + 1, kind=NodeKind.GATE), Node(i * 3 + 2), Node(i * 3 + 3))
+        for i in range(1000)
+    ]
     ids = {id(t.gate) for t in ts}
     assert len(ids) == 1000
     ids = {id(t.source) for t in ts}

@@ -3,6 +3,7 @@
 from .logic_value import LogicValue
 from .node import Node, NodeKind
 from .logic_device import LogicDevice, LogicDeviceKind, VDD, GND, Input, Probe, Port
+from .transistor import Transistor, TransistorKind, NMOS, PMOS
 
 __all__ = [
     "LogicValue",
@@ -15,4 +16,8 @@ __all__ = [
     "Input",
     "Probe",
     "Port",
+    "Transistor",
+    "TransistorKind",
+    "NMOS",
+    "PMOS",
 ]

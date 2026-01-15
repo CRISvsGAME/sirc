@@ -1,6 +1,7 @@
 """SIRC Device Simulator Dependency Module."""
 
 from __future__ import annotations
+from ..core.node import Node, NodeKind
 
 
 class IdentificationFactory:
@@ -31,3 +32,23 @@ class IdentificationFactory:
         transistor_id = self._next_transistor_id
         self._next_transistor_id += 1
         return transistor_id
+
+
+class NodeFactory:
+    """Node Factory"""
+
+    __slots__ = ("_id_factory",)
+
+    def __init__(self, id_factory: IdentificationFactory) -> None:
+        """Initialize the Node Factory."""
+        self._id_factory = id_factory
+
+    def create_base_node(self) -> Node:
+        """Create a new BASE Node with a unique ID."""
+        node_id = self._id_factory.allocate_node_id()
+        return Node(node_id, NodeKind.BASE)
+
+    def create_gate_node(self) -> Node:
+        """Create a new GATE Node with a unique ID."""
+        node_id = self._id_factory.allocate_node_id()
+        return Node(node_id, NodeKind.GATE)

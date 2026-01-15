@@ -1,5 +1,5 @@
 """SIRC Simulator Module."""
 
-from .device_dep import IdentificationFactory
+from .device_dep import IdentificationFactory, NodeFactory
 
-__all__ = ["IdentificationFactory"]
+__all__ = ["IdentificationFactory", "NodeFactory"]

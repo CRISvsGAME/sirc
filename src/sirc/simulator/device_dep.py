@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from ..core.node import Node, NodeKind
+from ..core.logic_device import VDD, GND, Input, Probe, Port
 
 
 class IdentificationFactory:
@@ -52,3 +53,46 @@ class NodeFactory:
         """Create a new GATE Node with a unique ID."""
         node_id = self._id_factory.allocate_node_id()
         return Node(node_id, NodeKind.GATE)
+
+
+class LogicDeviceFactory:
+    """Logic Device Factory"""
+
+    __slots__ = ("_id_factory", "_node_factory")
+
+    def __init__(
+        self, id_factory: IdentificationFactory, node_factory: NodeFactory
+    ) -> None:
+        """Initialize the Logic Device Factory."""
+        self._id_factory = id_factory
+        self._node_factory = node_factory
+
+    def create_vdd(self) -> VDD:
+        """Create a new VDD device with a unique ID and terminal Node."""
+        device_id = self._id_factory.allocate_device_id()
+        node = self._node_factory.create_base_node()
+        return VDD(device_id, node)
+
+    def create_gnd(self) -> GND:
+        """Create a new GND device with a unique ID and terminal Node."""
+        device_id = self._id_factory.allocate_device_id()
+        node = self._node_factory.create_base_node()
+        return GND(device_id, node)
+
+    def create_input(self) -> Input:
+        """Create a new Input device with a unique ID and terminal Node."""
+        device_id = self._id_factory.allocate_device_id()
+        node = self._node_factory.create_base_node()
+        return Input(device_id, node)
+
+    def create_probe(self) -> Probe:
+        """Create a new Probe device with a unique ID and terminal Node."""
+        device_id = self._id_factory.allocate_device_id()
+        node = self._node_factory.create_base_node()
+        return Probe(device_id, node)
+
+    def create_port(self) -> Port:
+        """Create a new Port device with a unique ID and terminal Node."""
+        device_id = self._id_factory.allocate_device_id()
+        node = self._node_factory.create_base_node()
+        return Port(device_id, node)

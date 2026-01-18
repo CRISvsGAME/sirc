@@ -1,5 +1,15 @@
 """SIRC Simulator Module."""
 
-from .device_dep import IdentificationFactory, NodeFactory, LogicDeviceFactory
+from .device_dep import (
+    IdentificationFactory,
+    NodeFactory,
+    LogicDeviceFactory,
+    TransistorFactory,
+)
 
-__all__ = ["IdentificationFactory", "NodeFactory", "LogicDeviceFactory"]
+__all__ = [
+    "IdentificationFactory",
+    "NodeFactory",
+    "LogicDeviceFactory",
+    "TransistorFactory",
+]

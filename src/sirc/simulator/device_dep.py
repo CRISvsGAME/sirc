@@ -3,6 +3,7 @@
 from __future__ import annotations
 from ..core.node import Node, NodeKind
 from ..core.logic_device import VDD, GND, Input, Probe, Port
+from ..core.transistor import NMOS, PMOS
 
 
 class IdentificationFactory:
@@ -96,3 +97,32 @@ class LogicDeviceFactory:
         device_id = self._id_factory.allocate_device_id()
         node = self._node_factory.create_base_node()
         return Port(device_id, node)
+
+
+class TransistorFactory:
+    """Transistor Factory"""
+
+    __slots__ = ("_id_factory", "_node_factory")
+
+    def __init__(
+        self, id_factory: IdentificationFactory, node_factory: NodeFactory
+    ) -> None:
+        """Initialize the Transistor Factory."""
+        self._id_factory = id_factory
+        self._node_factory = node_factory
+
+    def create_nmos(self) -> NMOS:
+        """Create a new NMOS transistor with a unique ID and terminal Nodes."""
+        transistor_id = self._id_factory.allocate_transistor_id()
+        gate = self._node_factory.create_gate_node()
+        source = self._node_factory.create_base_node()
+        drain = self._node_factory.create_base_node()
+        return NMOS(transistor_id, gate, source, drain)
+
+    def create_pmos(self) -> PMOS:
+        """Create a new PMOS transistor with a unique ID and terminal Nodes."""
+        transistor_id = self._id_factory.allocate_transistor_id()
+        gate = self._node_factory.create_gate_node()
+        source = self._node_factory.create_base_node()
+        drain = self._node_factory.create_base_node()
+        return PMOS(transistor_id, gate, source, drain)

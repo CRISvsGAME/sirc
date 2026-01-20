@@ -5,6 +5,7 @@ from .device_dep import (
     NodeFactory,
     LogicDeviceFactory,
     TransistorFactory,
+    DeviceSimulatorState,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "NodeFactory",
     "LogicDeviceFactory",
     "TransistorFactory",
+    "DeviceSimulatorState",
 ]

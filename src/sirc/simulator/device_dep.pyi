@@ -1,6 +1,6 @@
-from ..core.logic_device import GND as GND, Input as Input, Port as Port, Probe as Probe, VDD as VDD
+from ..core.logic_device import GND as GND, Input as Input, LogicDevice as LogicDevice, Port as Port, Probe as Probe, VDD as VDD
 from ..core.node import Node as Node, NodeKind as NodeKind
-from ..core.transistor import NMOS as NMOS, PMOS as PMOS
+from ..core.transistor import NMOS as NMOS, PMOS as PMOS, Transistor as Transistor
 
 class IdentificationFactory:
     def __init__(self) -> None: ...
@@ -25,3 +25,10 @@ class TransistorFactory:
     def __init__(self, id_factory: IdentificationFactory, node_factory: NodeFactory) -> None: ...
     def create_nmos(self) -> NMOS: ...
     def create_pmos(self) -> PMOS: ...
+
+class DeviceSimulatorState:
+    nodes: list[Node]
+    devices: list[LogicDevice]
+    transistors: list[Transistor]
+    wires: list[tuple[int, int]]
+    def __init__(self) -> None: ...

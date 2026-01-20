@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 from ..core.node import Node, NodeKind
-from ..core.logic_device import VDD, GND, Input, Probe, Port
-from ..core.transistor import NMOS, PMOS
+from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
+from ..core.transistor import Transistor, NMOS, PMOS
 
 
 class IdentificationFactory:
@@ -126,3 +126,17 @@ class TransistorFactory:
         source = self._node_factory.create_base_node()
         drain = self._node_factory.create_base_node()
         return PMOS(transistor_id, gate, source, drain)
+
+
+# pylint: disable=too-few-public-methods
+class DeviceSimulatorState:
+    """Device Simulator State"""
+
+    __slots__ = ("nodes", "devices", "transistors", "wires")
+
+    def __init__(self) -> None:
+        """Initialize the Device Simulator State."""
+        self.nodes: list[Node] = []
+        self.devices: list[LogicDevice] = []
+        self.transistors: list[Transistor] = []
+        self.wires: list[tuple[int, int]] = []

@@ -1,7 +1,12 @@
 """Unit tests for Device Simulator Dependency Module."""
 
-from sirc.core import LogicValue, NodeKind, LogicDeviceKind
-from sirc.simulator import IdentificationFactory, NodeFactory, LogicDeviceFactory
+from sirc.core import LogicValue, NodeKind, LogicDeviceKind, TransistorKind
+from sirc.simulator import (
+    IdentificationFactory,
+    NodeFactory,
+    LogicDeviceFactory,
+    TransistorFactory,
+)
 
 # ------------------------------------------------------------------------------
 # Identification Factory Tests
@@ -166,3 +171,67 @@ def test_logic_device_factory_ids_are_shared():
     assert input_.id == 2
     assert probe.id == 3
     assert port.id == 4
+
+
+# ------------------------------------------------------------------------------
+# Transistor Factory Tests
+# ------------------------------------------------------------------------------
+
+
+def test_transistor_factory_creates_nmos_transistors():
+    """TransistorFactory must create NMOS transistors with monotonic IDs."""
+    id_factory = IdentificationFactory()
+    node_factory = NodeFactory(id_factory)
+    transistor_factory = TransistorFactory(id_factory, node_factory)
+    nmos_transistors = [transistor_factory.create_nmos() for _ in range(100)]
+    for i, transistor in enumerate(nmos_transistors):
+        assert transistor.id == i
+        assert transistor.kind is TransistorKind.NMOS
+        assert transistor.gate.kind is NodeKind.GATE
+        assert transistor.source.kind is NodeKind.BASE
+        assert transistor.drain.kind is NodeKind.BASE
+        assert transistor.gate is not transistor.source
+        assert transistor.gate is not transistor.drain
+        assert transistor.source is not transistor.drain
+
+        base = i * 3
+        assert transistor.gate.id == base + 0
+        assert transistor.source.id == base + 1
+        assert transistor.drain.id == base + 2
+
+
+def test_transistor_factory_creates_pmos_transistors():
+    """TransistorFactory must create PMOS transistors with monotonic IDs."""
+    id_factory = IdentificationFactory()
+    node_factory = NodeFactory(id_factory)
+    transistor_factory = TransistorFactory(id_factory, node_factory)
+    pmos_transistors = [transistor_factory.create_pmos() for _ in range(100)]
+    for i, transistor in enumerate(pmos_transistors):
+        assert transistor.id == i
+        assert transistor.kind is TransistorKind.PMOS
+        assert transistor.gate.kind is NodeKind.GATE
+        assert transistor.source.kind is NodeKind.BASE
+        assert transistor.drain.kind is NodeKind.BASE
+        assert transistor.gate is not transistor.source
+        assert transistor.gate is not transistor.drain
+        assert transistor.source is not transistor.drain
+
+        base = i * 3
+        assert transistor.gate.id == base + 0
+        assert transistor.source.id == base + 1
+        assert transistor.drain.id == base + 2
+
+
+def test_transistor_factory_ids_are_shared():
+    """TransistorFactory must allocate shared IDs for all Transistors."""
+    id_factory = IdentificationFactory()
+    node_factory = NodeFactory(id_factory)
+    transistor_factory = TransistorFactory(id_factory, node_factory)
+    a = transistor_factory.create_nmos()
+    b = transistor_factory.create_pmos()
+    c = transistor_factory.create_nmos()
+    d = transistor_factory.create_pmos()
+    assert a.id == 0
+    assert b.id == 1
+    assert c.id == 2
+    assert d.id == 3

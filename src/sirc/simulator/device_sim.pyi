@@ -1,4 +1,4 @@
 from .device_dep import DeviceSimulatorState as DeviceSimulatorState, IdentificationFactory as IdentificationFactory, LogicDeviceFactory as LogicDeviceFactory, NodeFactory as NodeFactory, TransistorFactory as TransistorFactory
-from .device_sim import DeviceSimulator as DeviceSimulator
 
-__all__ = ['IdentificationFactory', 'NodeFactory', 'LogicDeviceFactory', 'TransistorFactory', 'DeviceSimulatorState', 'DeviceSimulator']
+class DeviceSimulator:
+    def __init__(self) -> None: ...

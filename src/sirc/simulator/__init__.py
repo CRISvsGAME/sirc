@@ -7,6 +7,7 @@ from .device_dep import (
     TransistorFactory,
     DeviceSimulatorState,
 )
+from .device_sim import DeviceSimulator
 
 __all__ = [
     "IdentificationFactory",
@@ -14,4 +15,5 @@ __all__ = [
     "LogicDeviceFactory",
     "TransistorFactory",
     "DeviceSimulatorState",
+    "DeviceSimulator",
 ]

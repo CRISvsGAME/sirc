@@ -8,6 +8,7 @@ paths, and propagate LogicValues across connected node-groups.
 """
 
 from __future__ import annotations
+from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
 from .device_dep import (
     IdentificationFactory,
     NodeFactory,
@@ -17,7 +18,6 @@ from .device_dep import (
 )
 
 
-# pylint: disable=too-few-public-methods
 class DeviceSimulator:
     """
     Simulator for evaluating SIRC logic devices and transistors.
@@ -37,3 +37,45 @@ class DeviceSimulator:
         self._device_f = LogicDeviceFactory(self._id_f, self._node_f)
         self._transistor_f = TransistorFactory(self._id_f, self._node_f)
         self._state = DeviceSimulatorState()
+
+    # --------------------------------------------------------------------------
+    # Device Creation and Registration
+    # --------------------------------------------------------------------------
+
+    def _register_device(self, device: LogicDevice) -> None:
+        """
+        Register a LogicDevice and its terminal Node. Must be called exactly
+        once per created device; registration order must match allocated IDs.
+        """
+        self._state.devices.append(device)
+        self._state.nodes.append(device.terminal)
+
+    def create_vdd(self) -> VDD:
+        """Create and register a new VDD device."""
+        vdd_device = self._device_f.create_vdd()
+        self._register_device(vdd_device)
+        return vdd_device
+
+    def create_gnd(self) -> GND:
+        """Create and register a new GND device."""
+        gnd_device = self._device_f.create_gnd()
+        self._register_device(gnd_device)
+        return gnd_device
+
+    def create_input(self) -> Input:
+        """Create and register a new Input device."""
+        input_device = self._device_f.create_input()
+        self._register_device(input_device)
+        return input_device
+
+    def create_probe(self) -> Probe:
+        """Create and register a new Probe device."""
+        probe_device = self._device_f.create_probe()
+        self._register_device(probe_device)
+        return probe_device
+
+    def create_port(self) -> Port:
+        """Create and register a new Port device."""
+        port_device = self._device_f.create_port()
+        self._register_device(port_device)
+        return port_device

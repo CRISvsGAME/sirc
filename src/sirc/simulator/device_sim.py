@@ -9,6 +9,7 @@ paths, and propagate LogicValues across connected node-groups.
 
 from __future__ import annotations
 from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
+from ..core.transistor import Transistor, NMOS, PMOS
 from .device_dep import (
     IdentificationFactory,
     NodeFactory,
@@ -79,3 +80,28 @@ class DeviceSimulator:
         port_device = self._device_f.create_port()
         self._register_device(port_device)
         return port_device
+
+    # --------------------------------------------------------------------------
+    # Transistor Creation and Registration
+    # --------------------------------------------------------------------------
+
+    def _register_transistor(self, transistor: Transistor) -> None:
+        """
+        Register a Transistor and its terminal Nodes. Must be called exactly
+        once per created transistor; registration order must match allocated IDs.
+        """
+        state = self._state
+        state.transistors.append(transistor)
+        state.nodes.extend(transistor.terminals())
+
+    def create_nmos(self) -> NMOS:
+        """Create and register a new NMOS transistor."""
+        nmos = self._transistor_f.create_nmos()
+        self._register_transistor(nmos)
+        return nmos
+
+    def create_pmos(self) -> PMOS:
+        """Create and register a new PMOS transistor."""
+        pmos = self._transistor_f.create_pmos()
+        self._register_transistor(pmos)
+        return pmos

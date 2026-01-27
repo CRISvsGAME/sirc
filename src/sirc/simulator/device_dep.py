@@ -113,18 +113,20 @@ class TransistorFactory:
 
     def create_nmos(self) -> NMOS:
         """Create a new NMOS transistor with a unique ID and terminal Nodes."""
+        node_factory = self._node_factory
         transistor_id = self._id_factory.allocate_transistor_id()
-        gate = self._node_factory.create_gate_node()
-        source = self._node_factory.create_base_node()
-        drain = self._node_factory.create_base_node()
+        gate = node_factory.create_gate_node()
+        source = node_factory.create_base_node()
+        drain = node_factory.create_base_node()
         return NMOS(transistor_id, gate, source, drain)
 
     def create_pmos(self) -> PMOS:
         """Create a new PMOS transistor with a unique ID and terminal Nodes."""
+        node_factory = self._node_factory
         transistor_id = self._id_factory.allocate_transistor_id()
-        gate = self._node_factory.create_gate_node()
-        source = self._node_factory.create_base_node()
-        drain = self._node_factory.create_base_node()
+        gate = node_factory.create_gate_node()
+        source = node_factory.create_base_node()
+        drain = node_factory.create_base_node()
         return PMOS(transistor_id, gate, source, drain)
 
 

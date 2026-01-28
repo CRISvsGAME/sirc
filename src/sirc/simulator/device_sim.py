@@ -8,6 +8,7 @@ paths, and propagate LogicValues across connected node-groups.
 """
 
 from __future__ import annotations
+from ..core.node import Node
 from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
 from ..core.transistor import Transistor, NMOS, PMOS
 from .device_dep import (
@@ -105,3 +106,20 @@ class DeviceSimulator:
         pmos = self._transistor_f.create_pmos()
         self._register_transistor(pmos)
         return pmos
+
+    # --------------------------------------------------------------------------
+    # Logical Connection
+    # --------------------------------------------------------------------------
+
+    def connect(self, node_a: Node, node_b: Node) -> None:
+        """Record an undirected wire connection between two Nodes."""
+        a = node_a.id
+        b = node_b.id
+
+        if a == b:
+            return
+
+        if a > b:
+            a, b = b, a
+
+        self._state.wires.append((a, b))

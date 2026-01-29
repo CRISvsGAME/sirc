@@ -2,11 +2,8 @@
 
 import cProfile
 import pstats
-from sirc.core.logic import LogicValue
-from sirc.core.node import Node
-from sirc.core.device import VDD, GND, Input, Probe, Port
-from sirc.core.transistor import NMOS, PMOS
-from sirc.simulator.device import DeviceSimulator
+from sirc.core import LogicValue, Node, VDD, GND
+from sirc.simulator import DeviceSimulator
 
 
 def build_inverter(
@@ -27,14 +24,11 @@ def build_inverter(
     Returns:
         out: Node driven by this inverter
     """
-    inp_port = Port()
-    out_port = Port()
+    inp_port = sim.create_port()
+    out_port = sim.create_port()
 
-    pmos = PMOS()
-    nmos = NMOS()
-
-    sim.register_devices([inp_port, out_port])
-    sim.register_transistors([pmos, nmos])
+    pmos = sim.create_pmos()
+    nmos = sim.create_nmos()
 
     sim.connect(inp, inp_port.terminal)
 
@@ -54,13 +48,11 @@ def main(n: int = 1000):
     """SIRC Profiler"""
     sim = DeviceSimulator()
 
-    vdd = VDD()
-    gnd = GND()
+    vdd = sim.create_vdd()
+    gnd = sim.create_gnd()
 
-    inp = Input()
-    probe = Probe()
-
-    sim.register_devices([vdd, gnd, inp, probe])
+    inp = sim.create_input()
+    probe = sim.create_probe()
 
     current_node: Node = inp.terminal
 
@@ -69,13 +61,13 @@ def main(n: int = 1000):
 
     sim.connect(current_node, probe.terminal)
 
-    inp.set_value(LogicValue.ONE)
     sim.build_topology()
+
+    inp.set_value(LogicValue.ONE)
     sim.tick()
     print("Input = 1 → Output =", probe.sample())
 
     inp.set_value(LogicValue.ZERO)
-    sim.build_topology()
     sim.tick()
     print("Input = 0 → Output =", probe.sample())
 

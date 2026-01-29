@@ -123,3 +123,23 @@ class DeviceSimulator:
             a, b = b, a
 
         self._state.wires.append((a, b))
+
+    def _reference_build_topology(self) -> None:
+        """Reference Build Topology"""
+
+    def _reference_tick(self) -> None:
+        """Reference Tick"""
+
+    def _compiled_build_topology(self) -> None:
+        """Compiled Build Topology"""
+
+    def _compiled_tick(self) -> None:
+        """Compiled Tick"""
+
+    def build_topology(self) -> None:
+        """Build Topology"""
+        self._reference_build_topology()
+
+    def tick(self) -> None:
+        """Tick"""
+        self._reference_tick()

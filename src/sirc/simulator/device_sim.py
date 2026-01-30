@@ -49,8 +49,9 @@ class DeviceSimulator:
         Register a LogicDevice and its terminal Node. Must be called exactly
         once per created device; registration order must match allocated IDs.
         """
-        self._state.devices.append(device)
-        self._state.nodes.append(device.terminal)
+        state = self._state
+        state.devices.append(device)
+        state.nodes.append(device.terminal)
 
     def create_vdd(self) -> VDD:
         """Create and register a new VDD device."""
@@ -122,7 +123,38 @@ class DeviceSimulator:
         if a > b:
             a, b = b, a
 
-        self._state.wires.append((a, b))
+        edge = (a, b)
+        state = self._state
+        wires_cache = state.wires_cache
+
+        if edge not in wires_cache:
+            wires = state.wires
+            index = len(wires)
+            wires.append(edge)
+            wires_cache[edge] = index
+
+    def disconnect(self, node_a: Node, node_b: Node) -> None:
+        """Remove an undirected wire connection between two Nodes."""
+        a = node_a.id
+        b = node_b.id
+
+        if a == b:
+            return
+
+        if a > b:
+            a, b = b, a
+
+        edge = (a, b)
+        state = self._state
+        wires_cache = state.wires_cache
+        index = wires_cache.pop(edge, None)
+
+        if index is not None:
+            wires = state.wires
+            last_edge = wires.pop()
+            if index < len(wires):
+                wires[index] = last_edge
+                wires_cache[last_edge] = index
 
     def _reference_build_topology(self) -> None:
         """Reference Build Topology"""

@@ -134,7 +134,14 @@ class TransistorFactory:
 class DeviceSimulatorState:
     """Device Simulator State"""
 
-    __slots__ = ("nodes", "devices", "transistors", "wires", "wires_cache")
+    __slots__ = (
+        "nodes",
+        "devices",
+        "transistors",
+        "wires",
+        "wires_cache",
+        "reference_static_neighbors",
+    )
 
     def __init__(self) -> None:
         """Initialize the Device Simulator State."""
@@ -143,3 +150,4 @@ class DeviceSimulatorState:
         self.transistors: list[Transistor] = []
         self.wires: list[tuple[int, int]] = []
         self.wires_cache: dict[tuple[int, int], int] = {}
+        self.reference_static_neighbors: list[list[int]] = []

@@ -158,6 +158,16 @@ class DeviceSimulator:
 
     def _reference_build_topology(self) -> None:
         """Reference Build Topology"""
+        state = self._state
+        node_count = len(state.nodes)
+
+        neighbors: list[list[int]] = [[] for _ in range(node_count)]
+
+        for a, b in state.wires:
+            neighbors[a].append(b)
+            neighbors[b].append(a)
+
+        state.reference_static_neighbors = neighbors
 
     def _reference_tick(self) -> None:
         """Reference Tick"""

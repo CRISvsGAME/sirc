@@ -169,8 +169,43 @@ class DeviceSimulator:
 
         state.reference_static_neighbors = neighbors
 
+    def _reference_build_components(self) -> None:
+        """Reference Build Components"""
+        state = self._state
+        node_count = len(state.nodes)
+
+        if not node_count:
+            state.reference_components = []
+            return
+
+        static_neighbors = state.reference_static_neighbors
+        visited = [False] * node_count
+        components: list[list[int]] = []
+
+        for start in range(node_count):
+            if visited[start]:
+                continue
+
+            stack = [start]
+            visited[start] = True
+            component: list[int] = []
+
+            while stack:
+                node = stack.pop()
+                component.append(node)
+
+                for neighbor in static_neighbors[node]:
+                    if not visited[neighbor]:
+                        stack.append(neighbor)
+                        visited[neighbor] = True
+
+            components.append(component)
+
+        state.reference_components = components
+
     def _reference_tick(self) -> None:
         """Reference Tick"""
+        self._reference_build_components()
 
     def _compiled_build_topology(self) -> None:
         """Compiled Build Topology"""

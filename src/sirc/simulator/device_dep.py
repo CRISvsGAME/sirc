@@ -141,6 +141,7 @@ class DeviceSimulatorState:
         "wires",
         "wires_cache",
         "reference_static_neighbors",
+        "reference_components",
     )
 
     def __init__(self) -> None:
@@ -151,3 +152,4 @@ class DeviceSimulatorState:
         self.wires: list[tuple[int, int]] = []
         self.wires_cache: dict[tuple[int, int], int] = {}
         self.reference_static_neighbors: list[list[int]] = []
+        self.reference_components: list[list[int]] = []

@@ -176,11 +176,15 @@ class DeviceSimulator:
 
         if not node_count:
             state.reference_components = []
+            state.reference_component_id = []
             return
 
         static_neighbors = state.reference_static_neighbors
         visited = [False] * node_count
         components: list[list[int]] = []
+        component_id = [-1] * node_count
+
+        cid = 0
 
         for start in range(node_count):
             if visited[start]:
@@ -193,6 +197,7 @@ class DeviceSimulator:
             while stack:
                 node = stack.pop()
                 component.append(node)
+                component_id[node] = cid
 
                 for neighbor in static_neighbors[node]:
                     if not visited[neighbor]:
@@ -201,7 +206,10 @@ class DeviceSimulator:
 
             components.append(component)
 
+            cid += 1
+
         state.reference_components = components
+        state.reference_component_id = component_id
 
     def _reference_tick(self) -> None:
         """Reference Tick"""

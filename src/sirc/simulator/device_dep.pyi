@@ -34,4 +34,5 @@ class DeviceSimulatorState:
     wires_cache: dict[tuple[int, int], int]
     reference_static_neighbors: list[list[int]]
     reference_components: list[list[int]]
+    reference_component_id: list[int]
     def __init__(self) -> None: ...

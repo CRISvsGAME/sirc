@@ -130,7 +130,7 @@ class TransistorFactory:
         return PMOS(transistor_id, gate, source, drain)
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, too-many-instance-attributes
 class DeviceSimulatorState:
     """Device Simulator State"""
 
@@ -142,6 +142,7 @@ class DeviceSimulatorState:
         "wires_cache",
         "reference_static_neighbors",
         "reference_components",
+        "reference_component_id",
     )
 
     def __init__(self) -> None:
@@ -153,3 +154,4 @@ class DeviceSimulatorState:
         self.wires_cache: dict[tuple[int, int], int] = {}
         self.reference_static_neighbors: list[list[int]] = []
         self.reference_components: list[list[int]] = []
+        self.reference_component_id: list[int] = []

@@ -156,18 +156,36 @@ class DeviceSimulator:
                 wires[index] = last_edge
                 wires_cache[last_edge] = index
 
-    def _reference_build_topology(self) -> None:
-        """Reference Build Topology"""
+    def _reference_build_static_topology(self) -> None:
+        """Reference Build Static Topology"""
         state = self._state
         node_count = len(state.nodes)
 
-        neighbors: list[list[int]] = [[] for _ in range(node_count)]
+        static_neighbors: list[list[int]] = [[] for _ in range(node_count)]
+        dynamic_neighbors: list[list[int]] = [[] for _ in range(node_count)]
 
         for a, b in state.wires:
-            neighbors[a].append(b)
-            neighbors[b].append(a)
+            static_neighbors[a].append(b)
+            static_neighbors[b].append(a)
 
-        state.reference_static_neighbors = neighbors
+        state.reference_static_neighbors = static_neighbors
+        state.reference_dynamic_neighbors = dynamic_neighbors
+
+    def _reference_build_dynamic_topology(self) -> None:
+        """Reference Build Dynamic Topology"""
+        state = self._state
+        transistors = state.transistors
+        dynamic_neighbors = state.reference_dynamic_neighbors
+
+        for neighbors in dynamic_neighbors:
+            neighbors.clear()
+
+        for transistor in transistors:
+            if transistor.is_conducting():
+                source_id = transistor.source.id
+                drain_id = transistor.drain.id
+                dynamic_neighbors[source_id].append(drain_id)
+                dynamic_neighbors[drain_id].append(source_id)
 
     def _reference_build_components(self) -> None:
         """Reference Build Components"""
@@ -180,6 +198,7 @@ class DeviceSimulator:
             return
 
         static_neighbors = state.reference_static_neighbors
+        dynamic_neighbors = state.reference_dynamic_neighbors
         visited = [False] * node_count
         components: list[list[int]] = []
         component_id = [-1] * node_count
@@ -190,8 +209,8 @@ class DeviceSimulator:
             if visited[start]:
                 continue
 
-            stack = [start]
             visited[start] = True
+            stack = [start]
             component: list[int] = []
 
             while stack:
@@ -201,8 +220,13 @@ class DeviceSimulator:
 
                 for neighbor in static_neighbors[node]:
                     if not visited[neighbor]:
-                        stack.append(neighbor)
                         visited[neighbor] = True
+                        stack.append(neighbor)
+
+                for neighbor in dynamic_neighbors[node]:
+                    if not visited[neighbor]:
+                        visited[neighbor] = True
+                        stack.append(neighbor)
 
             components.append(component)
 
@@ -213,6 +237,7 @@ class DeviceSimulator:
 
     def _reference_tick(self) -> None:
         """Reference Tick"""
+        self._reference_build_dynamic_topology()
         self._reference_build_components()
 
     def _compiled_build_topology(self) -> None:
@@ -223,7 +248,7 @@ class DeviceSimulator:
 
     def build_topology(self) -> None:
         """Build Topology"""
-        self._reference_build_topology()
+        self._reference_build_static_topology()
 
     def tick(self) -> None:
         """Tick"""

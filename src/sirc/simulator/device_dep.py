@@ -141,6 +141,7 @@ class DeviceSimulatorState:
         "wires",
         "wires_cache",
         "reference_static_neighbors",
+        "reference_dynamic_neighbors",
         "reference_components",
         "reference_component_id",
     )
@@ -153,5 +154,6 @@ class DeviceSimulatorState:
         self.wires: list[tuple[int, int]] = []
         self.wires_cache: dict[tuple[int, int], int] = {}
         self.reference_static_neighbors: list[list[int]] = []
+        self.reference_dynamic_neighbors: list[list[int]] = []
         self.reference_components: list[list[int]] = []
         self.reference_component_id: list[int] = []

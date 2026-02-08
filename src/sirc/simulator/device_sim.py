@@ -8,6 +8,7 @@ paths, and propagate LogicValues across connected node-groups.
 """
 
 from __future__ import annotations
+from ..core.logic_value import LogicValue
 from ..core.node import Node
 from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
 from ..core.transistor import Transistor, NMOS, PMOS
@@ -235,10 +236,30 @@ class DeviceSimulator:
         state.reference_components = components
         state.reference_component_id = component_id
 
+    def _reference_resolve_components(self) -> None:
+        """Reference Resolve Components"""
+        state = self._state
+        nodes = state.nodes
+        components = state.reference_components
+
+        for component in components:
+            values: list[LogicValue] = []
+
+            for node_id in component:
+                node = nodes[node_id]
+                values.append(node.default_value)
+
+            resolved_value = LogicValue.resolve_all(values)
+
+            for node_id in component:
+                node = nodes[node_id]
+                node.set_resolved_value(resolved_value)
+
     def _reference_tick(self) -> None:
         """Reference Tick"""
         self._reference_build_dynamic_topology()
         self._reference_build_components()
+        self._reference_resolve_components()
 
     def _compiled_build_topology(self) -> None:
         """Compiled Build Topology"""

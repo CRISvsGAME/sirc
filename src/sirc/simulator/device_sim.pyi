@@ -1,4 +1,5 @@
 from ..core.logic_device import GND as GND, Input as Input, LogicDevice as LogicDevice, Port as Port, Probe as Probe, VDD as VDD
+from ..core.logic_value import LogicValue as LogicValue
 from ..core.node import Node as Node
 from ..core.transistor import NMOS as NMOS, PMOS as PMOS, Transistor as Transistor
 from .device_dep import DeviceSimulatorState as DeviceSimulatorState, IdentificationFactory as IdentificationFactory, LogicDeviceFactory as LogicDeviceFactory, NodeFactory as NodeFactory, TransistorFactory as TransistorFactory

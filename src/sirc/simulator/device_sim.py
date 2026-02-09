@@ -236,11 +236,13 @@ class DeviceSimulator:
         state.reference_components = components
         state.reference_component_id = component_id
 
-    def _reference_resolve_components(self) -> None:
+    def _reference_resolve_components(self) -> bool:
         """Reference Resolve Components"""
         state = self._state
         nodes = state.nodes
         components = state.reference_components
+
+        changed = False
 
         for component in components:
             values: list[LogicValue] = []
@@ -253,13 +255,23 @@ class DeviceSimulator:
 
             for node_id in component:
                 node = nodes[node_id]
+
+                if node.resolved_value != resolved_value:
+                    changed = True
+
                 node.set_resolved_value(resolved_value)
+
+        return changed
 
     def _reference_tick(self) -> None:
         """Reference Tick"""
-        self._reference_build_dynamic_topology()
-        self._reference_build_components()
-        self._reference_resolve_components()
+        while True:
+            self._reference_build_dynamic_topology()
+            self._reference_build_components()
+            changed = self._reference_resolve_components()
+
+            if not changed:
+                break
 
     def _compiled_build_topology(self) -> None:
         """Compiled Build Topology"""

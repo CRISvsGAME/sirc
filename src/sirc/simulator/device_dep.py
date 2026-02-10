@@ -144,6 +144,7 @@ class DeviceSimulatorState:
         "reference_dynamic_neighbors",
         "reference_components",
         "reference_component_id",
+        "reference_transistor_conducting",
     )
 
     def __init__(self) -> None:
@@ -157,3 +158,4 @@ class DeviceSimulatorState:
         self.reference_dynamic_neighbors: list[list[int]] = []
         self.reference_components: list[list[int]] = []
         self.reference_component_id: list[int] = []
+        self.reference_transistor_conducting: list[bool] = []

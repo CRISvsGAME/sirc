@@ -36,4 +36,5 @@ class DeviceSimulatorState:
     reference_dynamic_neighbors: list[list[int]]
     reference_components: list[list[int]]
     reference_component_id: list[int]
+    reference_transistor_conducting: list[bool]
     def __init__(self) -> None: ...

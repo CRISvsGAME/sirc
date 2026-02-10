@@ -171,22 +171,34 @@ class DeviceSimulator:
 
         state.reference_static_neighbors = static_neighbors
         state.reference_dynamic_neighbors = dynamic_neighbors
+        state.reference_transistor_conducting = [False] * len(state.transistors)
 
-    def _reference_build_dynamic_topology(self) -> None:
+    def _reference_build_dynamic_topology(self) -> bool:
         """Reference Build Dynamic Topology"""
         state = self._state
         transistors = state.transistors
         dynamic_neighbors = state.reference_dynamic_neighbors
+        conducting = state.reference_transistor_conducting
+
+        changed = False
 
         for neighbors in dynamic_neighbors:
             neighbors.clear()
 
-        for transistor in transistors:
-            if transistor.is_conducting():
+        for transistor_id, transistor in enumerate(transistors):
+            status = transistor.is_conducting()
+
+            if status != conducting[transistor_id]:
+                conducting[transistor_id] = status
+                changed = True
+
+            if status:
                 source_id = transistor.source.id
                 drain_id = transistor.drain.id
                 dynamic_neighbors[source_id].append(drain_id)
                 dynamic_neighbors[drain_id].append(source_id)
+
+        return changed
 
     def _reference_build_components(self) -> None:
         """Reference Build Components"""
@@ -265,12 +277,17 @@ class DeviceSimulator:
 
     def _reference_tick(self) -> None:
         """Reference Tick"""
-        while True:
-            self._reference_build_dynamic_topology()
-            self._reference_build_components()
-            changed = self._reference_resolve_components()
+        self._reference_build_components()
 
-            if not changed:
+        while True:
+            dynamic_changed = self._reference_build_dynamic_topology()
+
+            if dynamic_changed:
+                self._reference_build_components()
+
+            value_changed = self._reference_resolve_components()
+
+            if not dynamic_changed and not value_changed:
                 break
 
     def _compiled_build_topology(self) -> None:

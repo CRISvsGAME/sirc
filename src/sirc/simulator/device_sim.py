@@ -157,8 +157,8 @@ class DeviceSimulator:
                 wires[index] = last_edge
                 wires_cache[last_edge] = index
 
-    def _reference_build_static_topology(self) -> None:
-        """Reference Build Static Topology"""
+    def _build_static_topology(self) -> None:
+        """Build Static Topology"""
         state = self._state
         node_count = len(state.nodes)
 
@@ -169,16 +169,16 @@ class DeviceSimulator:
             static_neighbors[a].append(b)
             static_neighbors[b].append(a)
 
-        state.reference_static_neighbors = static_neighbors
-        state.reference_dynamic_neighbors = dynamic_neighbors
-        state.reference_transistor_conducting = [False] * len(state.transistors)
+        state.static_neighbors = static_neighbors
+        state.dynamic_neighbors = dynamic_neighbors
+        state.transistor_conducting = [False] * len(state.transistors)
 
-    def _reference_build_dynamic_topology(self) -> bool:
-        """Reference Build Dynamic Topology"""
+    def _build_dynamic_topology(self) -> bool:
+        """Build Dynamic Topology"""
         state = self._state
         transistors = state.transistors
-        dynamic_neighbors = state.reference_dynamic_neighbors
-        conducting = state.reference_transistor_conducting
+        dynamic_neighbors = state.dynamic_neighbors
+        conducting = state.transistor_conducting
 
         changed = False
 
@@ -200,18 +200,18 @@ class DeviceSimulator:
 
         return changed
 
-    def _reference_build_components(self) -> None:
-        """Reference Build Components"""
+    def _build_components(self) -> None:
+        """Build Components"""
         state = self._state
         node_count = len(state.nodes)
 
         if not node_count:
-            state.reference_components = []
-            state.reference_component_id = []
+            state.components = []
+            state.component_id = []
             return
 
-        static_neighbors = state.reference_static_neighbors
-        dynamic_neighbors = state.reference_dynamic_neighbors
+        static_neighbors = state.static_neighbors
+        dynamic_neighbors = state.dynamic_neighbors
         visited = [False] * node_count
         components: list[list[int]] = []
         component_id = [-1] * node_count
@@ -245,14 +245,14 @@ class DeviceSimulator:
 
             cid += 1
 
-        state.reference_components = components
-        state.reference_component_id = component_id
+        state.components = components
+        state.component_id = component_id
 
-    def _reference_resolve_components(self) -> bool:
-        """Reference Resolve Components"""
+    def _resolve_components(self) -> bool:
+        """Resolve Components"""
         state = self._state
         nodes = state.nodes
-        components = state.reference_components
+        components = state.components
 
         changed = False
 
@@ -275,31 +275,21 @@ class DeviceSimulator:
 
         return changed
 
-    def _reference_tick(self) -> None:
-        """Reference Tick"""
-        self._reference_build_components()
-
-        while True:
-            dynamic_changed = self._reference_build_dynamic_topology()
-
-            if dynamic_changed:
-                self._reference_build_components()
-
-            value_changed = self._reference_resolve_components()
-
-            if not dynamic_changed and not value_changed:
-                break
-
-    def _compiled_build_topology(self) -> None:
-        """Compiled Build Topology"""
-
-    def _compiled_tick(self) -> None:
-        """Compiled Tick"""
-
     def build_topology(self) -> None:
         """Build Topology"""
-        self._reference_build_static_topology()
+        self._build_static_topology()
 
     def tick(self) -> None:
         """Tick"""
-        self._reference_tick()
+        self._build_components()
+
+        while True:
+            dynamic_changed = self._build_dynamic_topology()
+
+            if dynamic_changed:
+                self._build_components()
+
+            value_changed = self._resolve_components()
+
+            if not dynamic_changed and not value_changed:
+                break

@@ -140,11 +140,11 @@ class DeviceSimulatorState:
         "transistors",
         "wires",
         "wires_cache",
-        "reference_static_neighbors",
-        "reference_dynamic_neighbors",
-        "reference_components",
-        "reference_component_id",
-        "reference_transistor_conducting",
+        "static_neighbors",
+        "dynamic_neighbors",
+        "components",
+        "component_id",
+        "transistor_conducting",
     )
 
     def __init__(self) -> None:
@@ -154,8 +154,8 @@ class DeviceSimulatorState:
         self.transistors: list[Transistor] = []
         self.wires: list[tuple[int, int]] = []
         self.wires_cache: dict[tuple[int, int], int] = {}
-        self.reference_static_neighbors: list[list[int]] = []
-        self.reference_dynamic_neighbors: list[list[int]] = []
-        self.reference_components: list[list[int]] = []
-        self.reference_component_id: list[int] = []
-        self.reference_transistor_conducting: list[bool] = []
+        self.static_neighbors: list[list[int]] = []
+        self.dynamic_neighbors: list[list[int]] = []
+        self.components: list[list[int]] = []
+        self.component_id: list[int] = []
+        self.transistor_conducting: list[bool] = []

@@ -107,22 +107,34 @@ class LogicValue(Enum):
         Returns:
             LogicValue: The resolved value.
         """
-        if LogicValue.X in values:
+        has_any = False
+        has_zero = False
+        has_one = False
+
+        for value in values:
+            has_any = True
+
+            if value is LogicValue.X:
+                return LogicValue.X
+
+            if value is LogicValue.ZERO:
+                has_zero = True
+            elif value is LogicValue.ONE:
+                has_one = True
+
+        if not has_any:
+            raise ValueError("resolve_all() requires at least one LogicValue.")
+
+        if has_zero and has_one:
             return LogicValue.X
 
-        if LogicValue.ZERO in values and LogicValue.ONE in values:
-            return LogicValue.X
-
-        if LogicValue.ZERO in values:
+        if has_zero:
             return LogicValue.ZERO
 
-        if LogicValue.ONE in values:
+        if has_one:
             return LogicValue.ONE
 
-        if LogicValue.Z in values:
-            return LogicValue.Z
-
-        raise ValueError("resolve_all() requires at least one LogicValue.")
+        return LogicValue.Z
 
     # --------------------------------------------------------------------------
     # Display Helpers

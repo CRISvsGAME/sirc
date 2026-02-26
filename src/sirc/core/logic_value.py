@@ -7,12 +7,12 @@ IEEE 1800-2023, but the terminology used here follows SIRC conventions.
 """
 
 from __future__ import annotations
-from enum import Enum, unique
+from enum import IntEnum, unique
 from typing import Iterable
 
 
 @unique
-class LogicValue(Enum):
+class LogicValue(IntEnum):
     """
     Four-state digital logic value used by Nodes and drivers in SIRC.
 
@@ -23,10 +23,10 @@ class LogicValue(Enum):
         Z        -> undriven or high-impedance value
     """
 
-    ZERO = "0"
-    ONE = "1"
-    X = "X"
-    Z = "Z"
+    ZERO = 0b001
+    ONE = 0b010
+    X = 0b100
+    Z = 0b000
 
     # --------------------------------------------------------------------------
     # Helper Properties
@@ -119,14 +119,17 @@ class LogicValue(Enum):
 
             if value is LogicValue.ZERO:
                 has_zero = True
+
+                if has_one:
+                    return LogicValue.X
             elif value is LogicValue.ONE:
                 has_one = True
 
+                if has_zero:
+                    return LogicValue.X
+
         if not has_any:
             raise ValueError("resolve_all() requires at least one LogicValue.")
-
-        if has_zero and has_one:
-            return LogicValue.X
 
         if has_zero:
             return LogicValue.ZERO
@@ -142,7 +145,16 @@ class LogicValue(Enum):
 
     def __str__(self) -> str:
         """Return compact string form ('0', '1', 'X', 'Z')."""
-        return self.value
+        if self is LogicValue.ZERO:
+            return "0"
+
+        if self is LogicValue.ONE:
+            return "1"
+
+        if self is LogicValue.X:
+            return "X"
+
+        return "Z"
 
     def __repr__(self) -> str:
         """Return readable debug representation."""

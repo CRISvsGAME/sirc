@@ -1,4 +1,3 @@
-from _typeshed import Incomplete
 from enum import IntEnum
 from typing import Iterable
 
@@ -21,8 +20,8 @@ class LogicValue(IntEnum):
     @staticmethod
     def resolve_all_byte(mask: int) -> LogicValue: ...
 
-ZERO: Incomplete
-ONE: Incomplete
-X: Incomplete
-Z: Incomplete
+ZERO: LogicValue
+ONE: LogicValue
+X: LogicValue
+Z: LogicValue
 RESOLVE_TABLE: tuple[LogicValue, ...]

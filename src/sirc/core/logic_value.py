@@ -150,9 +150,9 @@ class LogicValue(IntEnum):
         return f"LogicValue.{self.name}"
 
 
-ZERO = LogicValue.ZERO
-ONE = LogicValue.ONE
-X = LogicValue.X
-Z = LogicValue.Z
+ZERO: LogicValue = LogicValue.ZERO
+ONE: LogicValue = LogicValue.ONE
+X: LogicValue = LogicValue.X
+Z: LogicValue = LogicValue.Z
 
 RESOLVE_TABLE: tuple[LogicValue, ...] = (Z, ZERO, ONE, X, X, X, X, X)

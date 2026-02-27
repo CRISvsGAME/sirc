@@ -36,13 +36,13 @@ def test_nodes_are_distinct():
 def test_set_default_value():
     """Setting default value must update the Node's stored default value."""
     n = Node(1)
-    n.set_default_value(LogicValue.ZERO)
+    n.default_value = LogicValue.ZERO
     assert n.default_value is LogicValue.ZERO
-    n.set_default_value(LogicValue.ONE)
+    n.default_value = LogicValue.ONE
     assert n.default_value is LogicValue.ONE
-    n.set_default_value(LogicValue.Z)
+    n.default_value = LogicValue.Z
     assert n.default_value is LogicValue.Z
-    n.set_default_value(LogicValue.X)
+    n.default_value = LogicValue.X
     assert n.default_value is LogicValue.X
 
 
@@ -54,13 +54,13 @@ def test_set_default_value():
 def test_set_resolved_value():
     """Setting resolved value must update the Node's stored resolved value."""
     n = Node(1)
-    n.set_resolved_value(LogicValue.ZERO)
+    n.resolved_value = LogicValue.ZERO
     assert n.resolved_value is LogicValue.ZERO
-    n.set_resolved_value(LogicValue.ONE)
+    n.resolved_value = LogicValue.ONE
     assert n.resolved_value is LogicValue.ONE
-    n.set_resolved_value(LogicValue.Z)
+    n.resolved_value = LogicValue.Z
     assert n.resolved_value is LogicValue.Z
-    n.set_resolved_value(LogicValue.X)
+    n.resolved_value = LogicValue.X
     assert n.resolved_value is LogicValue.X
 
 
@@ -72,7 +72,7 @@ def test_set_resolved_value():
 def test_repr_contains_default_and_resolved_values():
     """__repr__ must include default and resolved values."""
     n = Node(1)
-    n.set_resolved_value(LogicValue.ONE)
+    n.resolved_value = LogicValue.ONE
     r = repr(n)
     assert "Node" in r
     assert "id=1" in r
@@ -84,7 +84,7 @@ def test_repr_contains_default_and_resolved_values():
 def test_repr_format():
     """__repr__ must have correct format."""
     n = Node(1)
-    n.set_resolved_value(LogicValue.ONE)
+    n.resolved_value = LogicValue.ONE
     r = repr(n)
     assert r.startswith("<Node ")
     assert r.endswith(">")

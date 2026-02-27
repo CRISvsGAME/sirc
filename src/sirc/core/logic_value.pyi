@@ -1,11 +1,12 @@
-from enum import Enum
+from _typeshed import Incomplete
+from enum import IntEnum
 from typing import Iterable
 
-class LogicValue(Enum):
-    ZERO = '0'
-    ONE = '1'
-    X = 'X'
-    Z = 'Z'
+class LogicValue(IntEnum):
+    ZERO = 1
+    ONE = 2
+    X = 4
+    Z = 0
     @property
     def is_zero(self) -> bool: ...
     @property
@@ -17,3 +18,11 @@ class LogicValue(Enum):
     def resolve(self, other: LogicValue) -> LogicValue: ...
     @staticmethod
     def resolve_all(values: Iterable[LogicValue]) -> LogicValue: ...
+    @staticmethod
+    def resolve_all_byte(mask: int) -> LogicValue: ...
+
+ZERO: Incomplete
+ONE: Incomplete
+X: Incomplete
+Z: Incomplete
+RESOLVE_TABLE: tuple[LogicValue, ...]

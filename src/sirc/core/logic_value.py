@@ -35,22 +35,22 @@ class LogicValue(IntEnum):
     @property
     def is_zero(self) -> bool:
         """Return True if this value is ZERO."""
-        return self is LogicValue.ZERO
+        return self is ZERO
 
     @property
     def is_one(self) -> bool:
         """Return True if this value is ONE."""
-        return self is LogicValue.ONE
+        return self is ONE
 
     @property
     def is_x(self) -> bool:
         """Return True if this value is unknown (X)."""
-        return self is LogicValue.X
+        return self is X
 
     @property
     def is_z(self) -> bool:
         """Return True if this value is high-impedance (Z)."""
-        return self is LogicValue.Z
+        return self is Z
 
     # --------------------------------------------------------------------------
     # Two-Driver Resolution
@@ -78,16 +78,15 @@ class LogicValue(IntEnum):
              Z | 0 | 1 | X | Z
         """
 
-        if self is other:
+        z_value = Z
+
+        if self is other or other is z_value:
             return self
 
-        if self is LogicValue.Z:
+        if self is z_value:
             return other
 
-        if other is LogicValue.Z:
-            return self
-
-        return LogicValue.X
+        return X
 
     # --------------------------------------------------------------------------
     # Multi-Driver Resolution
@@ -101,43 +100,16 @@ class LogicValue(IntEnum):
         Args:
             values: Iterable of LogicValue instances.
 
-        Raises:
-            ValueError: If no values are provided.
-
         Returns:
-            LogicValue: The resolved value.
+            LogicValue: The resolved value or Z if no values are provided.
         """
-        has_any = False
-        has_zero = False
-        has_one = False
+        mask = 0b000
 
         for value in values:
-            has_any = True
+            if value:
+                mask |= value
 
-            if value is LogicValue.X:
-                return LogicValue.X
-
-            if value is LogicValue.ZERO:
-                has_zero = True
-
-                if has_one:
-                    return LogicValue.X
-            elif value is LogicValue.ONE:
-                has_one = True
-
-                if has_zero:
-                    return LogicValue.X
-
-        if not has_any:
-            raise ValueError("resolve_all() requires at least one LogicValue.")
-
-        if has_zero:
-            return LogicValue.ZERO
-
-        if has_one:
-            return LogicValue.ONE
-
-        return LogicValue.Z
+        return RESOLVE_TABLE[mask]
 
     # --------------------------------------------------------------------------
     # Display Helpers
@@ -145,13 +117,13 @@ class LogicValue(IntEnum):
 
     def __str__(self) -> str:
         """Return compact string form ('0', '1', 'X', 'Z')."""
-        if self is LogicValue.ZERO:
+        if self is ZERO:
             return "0"
 
-        if self is LogicValue.ONE:
+        if self is ONE:
             return "1"
 
-        if self is LogicValue.X:
+        if self is X:
             return "X"
 
         return "Z"
@@ -159,3 +131,11 @@ class LogicValue(IntEnum):
     def __repr__(self) -> str:
         """Return readable debug representation."""
         return f"LogicValue.{self.name}"
+
+
+ZERO = LogicValue.ZERO
+ONE = LogicValue.ONE
+X = LogicValue.X
+Z = LogicValue.Z
+
+RESOLVE_TABLE: tuple[LogicValue, ...] = (Z, ZERO, ONE, X, X, X, X, X)

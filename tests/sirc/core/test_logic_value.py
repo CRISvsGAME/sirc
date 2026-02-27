@@ -72,10 +72,9 @@ def test_two_driver_resolution(a: LogicValue, b: LogicValue, expected: LogicValu
 # ------------------------------------------------------------------------------
 
 
-def test_resolve_all_empty_raises():
-    """Test that resolving an empty list raises ValueError."""
-    with pytest.raises(ValueError):
-        LogicValue.resolve_all([])
+def test_resolve_all_empty_returns_z():
+    """Test that resolving an empty list returns Z."""
+    assert LogicValue.resolve_all([]) is LogicValue.Z
 
 
 @pytest.mark.parametrize("value", list(LogicValue))

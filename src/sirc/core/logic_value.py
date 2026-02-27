@@ -111,6 +111,23 @@ class LogicValue(IntEnum):
 
         return RESOLVE_TABLE[mask]
 
+    @staticmethod
+    def resolve_all_byte(mask: int) -> LogicValue:
+        """
+        Resolve multiple driver values represented as a byte mask.
+
+        Args:
+            mask: An 8-bit integer where each bit represents a LogicValue:
+                - Bit  0 (0b001): ZERO
+                - Bit  1 (0b010): ONE
+                - Bit  2 (0b100): X
+                - Mask 0 (0b000): Z
+
+        Returns:
+            LogicValue: The resolved value.
+        """
+        return RESOLVE_TABLE[mask]
+
     # --------------------------------------------------------------------------
     # Display Helpers
     # --------------------------------------------------------------------------

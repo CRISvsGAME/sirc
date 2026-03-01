@@ -63,11 +63,7 @@ class LogicDevice:
     def __repr__(self) -> str:
         """Return a debug representation of this LogicDevice."""
         name = self.__class__.__name__
-        return (
-            f"<{name} id={self.id_} kind={self.kind!r} "
-            f"terminal_default_value={self.node.default_value!r} "
-            f"terminal_resolved_value={self.node.resolved_value!r}>"
-        )
+        return f"<{name} id={self.id_} kind={self.kind!r} " f"terminal={self.node!r}>"
 
 
 # ------------------------------------------------------------------------------

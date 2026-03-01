@@ -161,6 +161,5 @@ def test_repr_contains_class_value_terminal_info(device_class: type):
     assert r.startswith(f"<{device_class.__name__} ")
     assert f"id={d.id_}" in r
     assert f"kind=LogicDeviceKind.{d.kind.name}" in r
-    assert "terminal_default_value=" in r
-    assert "terminal_resolved_value=" in r
+    assert "terminal=" in r
     assert r.endswith(">")

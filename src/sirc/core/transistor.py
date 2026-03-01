@@ -13,8 +13,8 @@ source and drain are interchangeable.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import IntEnum
-from .logic_value import LogicValue
-from .node import Node, NodeKind
+from .logic_value import ZERO, ONE
+from .node import Node
 
 
 class TransistorKind(IntEnum):
@@ -32,6 +32,10 @@ class TransistorKind(IntEnum):
         return f"TransistorKind.{self.name}"
 
 
+NMOS_TRANSISTOR_KIND: TransistorKind = TransistorKind.NMOS
+PMOS_TRANSISTOR_KIND: TransistorKind = TransistorKind.PMOS
+
+
 class Transistor(ABC):
     """
     Abstract class for three-terminal transistor devices.
@@ -46,7 +50,7 @@ class Transistor(ABC):
     evaluation and node-group management is performed entirely by the Simulator.
     """
 
-    __slots__ = ("_id", "_kind", "_gate", "_source", "_drain")
+    __slots__ = ("id_", "kind", "gate", "source", "drain")
 
     # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
@@ -64,52 +68,11 @@ class Transistor(ABC):
         source and drain) and must be distinct. Nodes are registered and managed
         by the Simulator as part of the circuit topology.
         """
-        if gate.kind is not NodeKind.GATE:
-            raise TypeError("Transistor gate must be a Node with kind=GATE")
-
-        if source.kind is not NodeKind.BASE:
-            raise TypeError("Transistor source must be a Node with kind=BASE")
-
-        if drain.kind is not NodeKind.BASE:
-            raise TypeError("Transistor drain must be a Node with kind=BASE")
-
-        if gate is source or gate is drain or source is drain:
-            raise ValueError("Gate, source, and drain must be distinct Nodes")
-
-        self._id: int = transistor_id
-        self._kind: TransistorKind = kind
-        self._gate: Node = gate
-        self._source: Node = source
-        self._drain: Node = drain
-
-    # --------------------------------------------------------------------------
-    # Properties
-    # --------------------------------------------------------------------------
-
-    @property
-    def id(self) -> int:
-        """Return the unique identifier of this Transistor."""
-        return self._id
-
-    @property
-    def kind(self) -> TransistorKind:
-        """Return the kind of this Transistor."""
-        return self._kind
-
-    @property
-    def gate(self) -> Node:
-        """Return the gate Node of this Transistor."""
-        return self._gate
-
-    @property
-    def source(self) -> Node:
-        """Return the source Node of this Transistor."""
-        return self._source
-
-    @property
-    def drain(self) -> Node:
-        """Return the drain Node of this Transistor."""
-        return self._drain
+        self.id_: int = transistor_id
+        self.kind: TransistorKind = kind
+        self.gate: Node = gate
+        self.source: Node = source
+        self.drain: Node = drain
 
     # --------------------------------------------------------------------------
     # Abstract Methods
@@ -126,25 +89,16 @@ class Transistor(ABC):
         """
         raise NotImplementedError("Must be implemented by subclasses.")
 
-    # --------------------------------------------------------------------------
-    # Public Methods
-    # --------------------------------------------------------------------------
-
-    def terminals(self) -> tuple[Node, Node, Node]:
+    @abstractmethod
+    def is_conducting_byte(self) -> int:
         """
-        Return a tuple of (gate, source, drain) Nodes.
+        Return 1 if this transistor is currently conducting, else 0.
 
-        Used by the Simulator for registration and structural traversal.
+        This method is used by the Simulator's optimised dynamic topology
+        builder to efficiently determine whether the transistor's conduction
+        state has changed since the last evaluation.
         """
-        return (self._gate, self._source, self._drain)
-
-    def conduction_nodes(self) -> tuple[Node, Node]:
-        """
-        Return the (source, drain) Nodes involved in conduction.
-
-        Used by the Simulator when establishing or removing connectivity.
-        """
-        return (self._source, self._drain)
+        raise NotImplementedError("Must be implemented by subclasses.")
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -154,8 +108,8 @@ class Transistor(ABC):
         """Return a debug representation of this Transistor."""
         name = self.__class__.__name__
         return (
-            f"<{name} id={self._id} kind={self._kind!r} "
-            f"gate={self._gate!r} source={self._source!r} drain={self._drain!r}>"
+            f"<{name} id={self.id_} kind={self.kind!r} "
+            f"gate={self.gate!r} source={self.source!r} drain={self.drain!r}>"
         )
 
 
@@ -176,11 +130,13 @@ class NMOS(Transistor):
     def __init__(
         self, transistor_id: int, gate: Node, source: Node, drain: Node
     ) -> None:
-        super().__init__(transistor_id, TransistorKind.NMOS, gate, source, drain)
+        super().__init__(transistor_id, NMOS_TRANSISTOR_KIND, gate, source, drain)
 
     def is_conducting(self) -> bool:
-        g = self._gate.resolved_value
-        return g is LogicValue.ONE
+        return self.gate.resolved_value is ONE
+
+    def is_conducting_byte(self) -> int:
+        return 1 if self.gate.resolved_value is ONE else 0
 
 
 # ------------------------------------------------------------------------------
@@ -200,8 +156,10 @@ class PMOS(Transistor):
     def __init__(
         self, transistor_id: int, gate: Node, source: Node, drain: Node
     ) -> None:
-        super().__init__(transistor_id, TransistorKind.PMOS, gate, source, drain)
+        super().__init__(transistor_id, PMOS_TRANSISTOR_KIND, gate, source, drain)
 
     def is_conducting(self) -> bool:
-        g = self._gate.resolved_value
-        return g is LogicValue.ZERO
+        return self.gate.resolved_value is ZERO
+
+    def is_conducting_byte(self) -> int:
+        return 1 if self.gate.resolved_value is ZERO else 0

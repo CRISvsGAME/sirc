@@ -16,7 +16,14 @@ from .logic_device import (
     PROBE_DEVICE_KIND,
     PORT_DEVICE_KIND,
 )
-from .transistor import Transistor, TransistorKind, NMOS, PMOS
+from .transistor import (
+    Transistor,
+    TransistorKind,
+    NMOS,
+    PMOS,
+    NMOS_TRANSISTOR_KIND,
+    PMOS_TRANSISTOR_KIND,
+)
 
 __all__ = [
     "LogicValue",
@@ -45,4 +52,6 @@ __all__ = [
     "TransistorKind",
     "NMOS",
     "PMOS",
+    "NMOS_TRANSISTOR_KIND",
+    "PMOS_TRANSISTOR_KIND",
 ]

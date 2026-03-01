@@ -1,6 +1,5 @@
 """Unit tests for Transistor module."""
 
-import pytest
 from sirc.core import LogicValue, Node, NodeKind, Transistor, NMOS, PMOS
 
 # ------------------------------------------------------------------------------
@@ -22,70 +21,6 @@ def test_transistor_has_three_distinct_nodes():
     assert t.source is not t.drain
 
 
-def test_transistor_rejects_non_gate_node_as_gate():
-    """Transistor must raise TypeError if gate Node is not kind=GATE."""
-    g = Node(1)  # BASE Default
-    s = Node(2)
-    d = Node(3)
-    with pytest.raises(TypeError):
-        NMOS(1, g, s, d)
-    with pytest.raises(TypeError):
-        PMOS(2, g, s, d)
-
-
-def test_transistor_rejects_gate_used_as_conduction_node():
-    """Transistor must raise TypeError if source or drain Node is kind=GATE."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2, kind=NodeKind.GATE)
-    d = Node(3)
-    with pytest.raises(TypeError):
-        NMOS(1, g, s, d)
-    with pytest.raises(TypeError):
-        PMOS(2, g, s, d)
-    with pytest.raises(TypeError):
-        NMOS(3, g, d, s)
-    with pytest.raises(TypeError):
-        PMOS(4, g, d, s)
-
-
-def test_transistor_rejects_shared_nodes():
-    """Transistor must raise ValueError if gate, source, and drain Nodes are not distinct."""
-    g = Node(1, kind=NodeKind.GATE)
-    n = Node(2)
-    with pytest.raises(ValueError):
-        NMOS(1, g, n, n)
-    with pytest.raises(ValueError):
-        PMOS(1, g, n, n)
-
-
-# ------------------------------------------------------------------------------
-# Structural Helper Tests
-# ------------------------------------------------------------------------------
-
-
-def test_terminals_returns_gate_source_drain():
-    """terminals() must return (gate, source, drain) Nodes in order."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2)
-    d = Node(3)
-    t = NMOS(1, g, s, d)
-    g, s, d = t.terminals()
-    assert g is t.gate
-    assert s is t.source
-    assert d is t.drain
-
-
-def test_conduction_nodes_returns_source_and_drain():
-    """conduction_nodes() must return (source, drain) Nodes in order."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2)
-    d = Node(3)
-    t = PMOS(1, g, s, d)
-    s, d = t.conduction_nodes()
-    assert s is t.source
-    assert d is t.drain
-
-
 # ------------------------------------------------------------------------------
 # NMOS Conduction Tests
 # ------------------------------------------------------------------------------
@@ -98,16 +33,16 @@ def test_nmos_conduction_rules():
     d = Node(3)
     t = NMOS(1, g, s, d)
     # Gate = 0 → off
-    t.gate.set_resolved_value(LogicValue.ZERO)
+    t.gate.resolved_value = LogicValue.ZERO
     assert not t.is_conducting()
     # Gate = 1 → on
-    t.gate.set_resolved_value(LogicValue.ONE)
+    t.gate.resolved_value = LogicValue.ONE
     assert t.is_conducting()
     # Gate = X → off
-    t.gate.set_resolved_value(LogicValue.X)
+    t.gate.resolved_value = LogicValue.X
     assert not t.is_conducting()
     # Gate = Z → off
-    t.gate.set_resolved_value(LogicValue.Z)
+    t.gate.resolved_value = LogicValue.Z
     assert not t.is_conducting()
 
 
@@ -123,16 +58,16 @@ def test_pmos_conduction_rules():
     d = Node(3)
     t = PMOS(1, g, s, d)
     # Gate = 0 → on
-    t.gate.set_resolved_value(LogicValue.ZERO)
+    t.gate.resolved_value = LogicValue.ZERO
     assert t.is_conducting()
     # Gate = 1 → off
-    t.gate.set_resolved_value(LogicValue.ONE)
+    t.gate.resolved_value = LogicValue.ONE
     assert not t.is_conducting()
     # Gate = X → off
-    t.gate.set_resolved_value(LogicValue.X)
+    t.gate.resolved_value = LogicValue.X
     assert not t.is_conducting()
     # Gate = Z → off
-    t.gate.set_resolved_value(LogicValue.Z)
+    t.gate.resolved_value = LogicValue.Z
     assert not t.is_conducting()
 
 

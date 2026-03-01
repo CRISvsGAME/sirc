@@ -30,18 +30,18 @@ def build_inverter(
     pmos = sim.create_pmos()
     nmos = sim.create_nmos()
 
-    sim.connect(inp, inp_port.terminal)
+    sim.connect(inp, inp_port.node)
 
-    sim.connect(inp_port.terminal, pmos.gate)
-    sim.connect(inp_port.terminal, nmos.gate)
+    sim.connect(inp_port.node, pmos.gate)
+    sim.connect(inp_port.node, nmos.gate)
 
-    sim.connect(vdd.terminal, pmos.source)
-    sim.connect(gnd.terminal, nmos.source)
+    sim.connect(vdd.node, pmos.source)
+    sim.connect(gnd.node, nmos.source)
 
-    sim.connect(pmos.drain, out_port.terminal)
-    sim.connect(nmos.drain, out_port.terminal)
+    sim.connect(pmos.drain, out_port.node)
+    sim.connect(nmos.drain, out_port.node)
 
-    return out_port.terminal
+    return out_port.node
 
 
 def main(n: int = 1000):
@@ -54,12 +54,12 @@ def main(n: int = 1000):
     inp = sim.create_input()
     probe = sim.create_probe()
 
-    current_node: Node = inp.terminal
+    current_node: Node = inp.node
 
     for _ in range(n):
         current_node = build_inverter(sim, vdd, gnd, current_node)
 
-    sim.connect(current_node, probe.terminal)
+    sim.connect(current_node, probe.node)
 
     sim.build_topology()
 

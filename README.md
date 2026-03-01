@@ -19,7 +19,7 @@ pip install sirc
 Import the device simulator:
 
 ```python
-from sirc.simulator.device import DeviceSimulator
+from sirc.simulator import DeviceSimulator
 ```
 
 ---
@@ -27,51 +27,68 @@ from sirc.simulator.device import DeviceSimulator
 ## 🚀 Quick Start
 
 ```python
-from sirc.simulator.device import DeviceSimulator
-from sirc.core.logic import LogicValue
-from sirc.core.transistor import NMOS, PMOS
-from sirc.core.device import VDD, GND, Input, Probe, Port
+"""
+CMOS Inverter Example:
+
+                          [VDD]
+                            |
+                            |
+                            S
+                  +--| G [PMOS] D --+
+                  |                 |
+[INPUT]-->[PORT]--+                 +--[PORT]-->[PROBE]
+                  |                 |
+                  +--| G [NMOS] D --+
+                            S
+                            |
+                            |
+                          [GND]
+"""
+
+from sirc.core import LogicValue
+from sirc.simulator import DeviceSimulator
 
 sim = DeviceSimulator()
 
 # Create Devices and Transistors
-vdd = VDD()
-gnd = GND()
+vdd = sim.create_vdd()
+gnd = sim.create_gnd()
 
-inp = Input()
-probe = Probe()
+inp = sim.create_input()
+probe = sim.create_probe()
 
-inp_port = Port()
-out_port = Port()
+inp_port = sim.create_port()
+out_port = sim.create_port()
 
-pmos = PMOS()
-nmos = NMOS()
-
-# Register Devices and Transistors
-sim.register_devices([vdd, gnd, inp, probe, inp_port, out_port])
-sim.register_transistors([pmos, nmos])
+pmos = sim.create_pmos()
+nmos = sim.create_nmos()
 
 # Connect Components
-sim.connect(inp.terminal, inp_port.terminal)
-sim.connect(inp_port.terminal, pmos.gate)
-sim.connect(inp_port.terminal, nmos.gate)
-sim.connect(vdd.terminal, pmos.source)
-sim.connect(gnd.terminal, nmos.source)
-sim.connect(pmos.drain, out_port.terminal)
-sim.connect(nmos.drain, out_port.terminal)
-sim.connect(out_port.terminal, probe.terminal)
+sim.connect(inp.node, inp_port.node)
+sim.connect(inp_port.node, pmos.gate)
+sim.connect(inp_port.node, nmos.gate)
+sim.connect(vdd.node, pmos.source)
+sim.connect(gnd.node, nmos.source)
+sim.connect(pmos.drain, out_port.node)
+sim.connect(nmos.drain, out_port.node)
+sim.connect(out_port.node, probe.node)
+
+# Build Topology
+sim.build_topology()
 
 # Simulate and Sample Output
 inp.set_value(LogicValue.ONE)
-sim.build_topology()
 sim.tick()
 print(repr(probe.sample()))
 
 # Change Input and Resimulate
 inp.set_value(LogicValue.ZERO)
-sim.build_topology()
 sim.tick()
 print(repr(probe.sample()))
+
+# Expected Output:
+# LogicValue.ZERO
+# LogicValue.ONE
 ```
 
 ---
@@ -94,11 +111,8 @@ print(repr(probe.sample()))
 ### Fully Typed
 
 ```python
-from sirc.simulator.device import DeviceSimulator
-from sirc.core.logic import LogicValue
-from sirc.core.node import Node
-from sirc.core.device import LogicDevice, VDD, GND, Input, Probe, Port
-from sirc.core.transistor import Transistor, NMOS, PMOS
+from sirc.core import LogicValue
+from sirc.simulator import DeviceSimulator
 ```
 
 ---
@@ -109,23 +123,25 @@ from sirc.core.transistor import Transistor, NMOS, PMOS
 src/
     sirc/
         core/
-            device.py
-            logic.py
+            Logic_device.py
+            logic_value.py
             node.py
             transistor.py
         simulator/
-            device.py
+            device_dep.py
+            device_sim.py
 stats/
     main.py
 tests/
     sirc/
         core/
-            test_device.py
-            test_logic.py
+            test_logic_device.py
+            test_logic_value.py
             test_node.py
             test_transistor.py
         simulator/
-            test_device.py
+            test_device_dep.py
+            test_device_sim.py
 ```
 
 ---

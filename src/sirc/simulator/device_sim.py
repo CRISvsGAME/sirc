@@ -52,7 +52,7 @@ class DeviceSimulator:
         """
         state = self._state
         state.devices.append(device)
-        state.nodes.append(device.terminal)
+        state.nodes.append(device.node)
 
     def create_vdd(self) -> VDD:
         """Create and register a new VDD device."""
@@ -95,7 +95,7 @@ class DeviceSimulator:
         """
         state = self._state
         state.transistors.append(transistor)
-        state.nodes.extend(transistor.terminals())
+        state.nodes.extend((transistor.gate, transistor.source, transistor.drain))
 
     def create_nmos(self) -> NMOS:
         """Create and register a new NMOS transistor."""
@@ -115,8 +115,8 @@ class DeviceSimulator:
 
     def connect(self, node_a: Node, node_b: Node) -> None:
         """Record an undirected wire connection between two Nodes."""
-        a = node_a.id
-        b = node_b.id
+        a = node_a.id_
+        b = node_b.id_
 
         if a == b:
             return
@@ -136,8 +136,8 @@ class DeviceSimulator:
 
     def disconnect(self, node_a: Node, node_b: Node) -> None:
         """Remove an undirected wire connection between two Nodes."""
-        a = node_a.id
-        b = node_b.id
+        a = node_a.id_
+        b = node_b.id_
 
         if a == b:
             return
@@ -193,8 +193,8 @@ class DeviceSimulator:
                 changed = True
 
             if status:
-                source_id = transistor.source.id
-                drain_id = transistor.drain.id
+                source_id = transistor.source.id_
+                drain_id = transistor.drain.id_
                 dynamic_neighbors[source_id].append(drain_id)
                 dynamic_neighbors[drain_id].append(source_id)
 
@@ -257,13 +257,16 @@ class DeviceSimulator:
         changed = False
 
         for component in components:
-            values: list[LogicValue] = []
+            values: int = 0b000
 
             for node_id in component:
                 node = nodes[node_id]
-                values.append(node.default_value)
+                default_value = node.default_value
 
-            resolved_value = LogicValue.resolve_all(values)
+                if default_value:
+                    values |= default_value
+
+            resolved_value = LogicValue.resolve_all_byte(values)
 
             for node_id in component:
                 node = nodes[node_id]
@@ -271,7 +274,7 @@ class DeviceSimulator:
                 if node.resolved_value != resolved_value:
                     changed = True
 
-                node.set_resolved_value(resolved_value)
+                node.resolved_value = resolved_value
 
         return changed
 

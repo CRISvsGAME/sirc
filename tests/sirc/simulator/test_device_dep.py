@@ -56,7 +56,7 @@ def test_node_factory_creates_base_nodes():
     factory = NodeFactory(IdentificationFactory())
     base_nodes = [factory.create_base_node() for _ in range(100)]
     for i, node in enumerate(base_nodes):
-        assert node.id == i
+        assert node.id_ == i
         assert node.kind is NodeKind.BASE
 
 
@@ -65,7 +65,7 @@ def test_node_factory_creates_gate_nodes():
     factory = NodeFactory(IdentificationFactory())
     gate_nodes = [factory.create_gate_node() for _ in range(100)]
     for i, node in enumerate(gate_nodes):
-        assert node.id == i
+        assert node.id_ == i
         assert node.kind is NodeKind.GATE
 
 
@@ -76,13 +76,13 @@ def test_node_factory_ids_are_shared_between_base_and_gate():
     b = factory.create_gate_node()
     c = factory.create_base_node()
     d = factory.create_gate_node()
-    assert a.id == 0
+    assert a.id_ == 0
     assert a.kind is NodeKind.BASE
-    assert b.id == 1
+    assert b.id_ == 1
     assert b.kind is NodeKind.GATE
-    assert c.id == 2
+    assert c.id_ == 2
     assert c.kind is NodeKind.BASE
-    assert d.id == 3
+    assert d.id_ == 3
     assert d.kind is NodeKind.GATE
 
 
@@ -98,10 +98,10 @@ def test_logic_device_factory_creates_vdd_devices():
     device_factory = LogicDeviceFactory(id_factory, node_factory)
     vdd_devices = [device_factory.create_vdd() for _ in range(100)]
     for i, device in enumerate(vdd_devices):
-        assert device.id == i
+        assert device.id_ == i
         assert device.kind is LogicDeviceKind.VDD
-        assert device.terminal.kind is NodeKind.BASE
-        assert device.terminal.default_value is LogicValue.ONE
+        assert device.node.kind is NodeKind.BASE
+        assert device.node.default_value is LogicValue.ONE
 
 
 def test_logic_device_factory_creates_gnd_devices():
@@ -111,10 +111,10 @@ def test_logic_device_factory_creates_gnd_devices():
     device_factory = LogicDeviceFactory(id_factory, node_factory)
     gnd_devices = [device_factory.create_gnd() for _ in range(100)]
     for i, device in enumerate(gnd_devices):
-        assert device.id == i
+        assert device.id_ == i
         assert device.kind is LogicDeviceKind.GND
-        assert device.terminal.kind is NodeKind.BASE
-        assert device.terminal.default_value is LogicValue.ZERO
+        assert device.node.kind is NodeKind.BASE
+        assert device.node.default_value is LogicValue.ZERO
 
 
 def test_logic_device_factory_creates_input_devices():
@@ -124,10 +124,10 @@ def test_logic_device_factory_creates_input_devices():
     device_factory = LogicDeviceFactory(id_factory, node_factory)
     input_devices = [device_factory.create_input() for _ in range(100)]
     for i, device in enumerate(input_devices):
-        assert device.id == i
+        assert device.id_ == i
         assert device.kind is LogicDeviceKind.INPUT
-        assert device.terminal.kind is NodeKind.BASE
-        assert device.terminal.default_value is LogicValue.Z
+        assert device.node.kind is NodeKind.BASE
+        assert device.node.default_value is LogicValue.Z
 
 
 def test_logic_device_factory_creates_probe_devices():
@@ -137,10 +137,10 @@ def test_logic_device_factory_creates_probe_devices():
     device_factory = LogicDeviceFactory(id_factory, node_factory)
     probe_devices = [device_factory.create_probe() for _ in range(100)]
     for i, device in enumerate(probe_devices):
-        assert device.id == i
+        assert device.id_ == i
         assert device.kind is LogicDeviceKind.PROBE
-        assert device.terminal.kind is NodeKind.BASE
-        assert device.terminal.default_value is LogicValue.Z
+        assert device.node.kind is NodeKind.BASE
+        assert device.node.default_value is LogicValue.Z
 
 
 def test_logic_device_factory_creates_port_devices():
@@ -150,10 +150,10 @@ def test_logic_device_factory_creates_port_devices():
     device_factory = LogicDeviceFactory(id_factory, node_factory)
     port_devices = [device_factory.create_port() for _ in range(100)]
     for i, device in enumerate(port_devices):
-        assert device.id == i
+        assert device.id_ == i
         assert device.kind is LogicDeviceKind.PORT
-        assert device.terminal.kind is NodeKind.BASE
-        assert device.terminal.default_value is LogicValue.Z
+        assert device.node.kind is NodeKind.BASE
+        assert device.node.default_value is LogicValue.Z
 
 
 def test_logic_device_factory_ids_are_shared():
@@ -166,11 +166,11 @@ def test_logic_device_factory_ids_are_shared():
     input_ = device_factory.create_input()
     probe = device_factory.create_probe()
     port = device_factory.create_port()
-    assert vdd.id == 0
-    assert gnd.id == 1
-    assert input_.id == 2
-    assert probe.id == 3
-    assert port.id == 4
+    assert vdd.id_ == 0
+    assert gnd.id_ == 1
+    assert input_.id_ == 2
+    assert probe.id_ == 3
+    assert port.id_ == 4
 
 
 # ------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ def test_transistor_factory_creates_nmos_transistors():
     transistor_factory = TransistorFactory(id_factory, node_factory)
     nmos_transistors = [transistor_factory.create_nmos() for _ in range(100)]
     for i, transistor in enumerate(nmos_transistors):
-        assert transistor.id == i
+        assert transistor.id_ == i
         assert transistor.kind is TransistorKind.NMOS
         assert transistor.gate.kind is NodeKind.GATE
         assert transistor.source.kind is NodeKind.BASE
@@ -195,9 +195,9 @@ def test_transistor_factory_creates_nmos_transistors():
         assert transistor.source is not transistor.drain
 
         base = i * 3
-        assert transistor.gate.id == base + 0
-        assert transistor.source.id == base + 1
-        assert transistor.drain.id == base + 2
+        assert transistor.gate.id_ == base + 0
+        assert transistor.source.id_ == base + 1
+        assert transistor.drain.id_ == base + 2
 
 
 def test_transistor_factory_creates_pmos_transistors():
@@ -207,7 +207,7 @@ def test_transistor_factory_creates_pmos_transistors():
     transistor_factory = TransistorFactory(id_factory, node_factory)
     pmos_transistors = [transistor_factory.create_pmos() for _ in range(100)]
     for i, transistor in enumerate(pmos_transistors):
-        assert transistor.id == i
+        assert transistor.id_ == i
         assert transistor.kind is TransistorKind.PMOS
         assert transistor.gate.kind is NodeKind.GATE
         assert transistor.source.kind is NodeKind.BASE
@@ -217,9 +217,9 @@ def test_transistor_factory_creates_pmos_transistors():
         assert transistor.source is not transistor.drain
 
         base = i * 3
-        assert transistor.gate.id == base + 0
-        assert transistor.source.id == base + 1
-        assert transistor.drain.id == base + 2
+        assert transistor.gate.id_ == base + 0
+        assert transistor.source.id_ == base + 1
+        assert transistor.drain.id_ == base + 2
 
 
 def test_transistor_factory_ids_are_shared():
@@ -231,7 +231,7 @@ def test_transistor_factory_ids_are_shared():
     b = transistor_factory.create_pmos()
     c = transistor_factory.create_nmos()
     d = transistor_factory.create_pmos()
-    assert a.id == 0
-    assert b.id == 1
-    assert c.id == 2
-    assert d.id == 3
+    assert a.id_ == 0
+    assert b.id_ == 1
+    assert c.id_ == 2
+    assert d.id_ == 3

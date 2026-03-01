@@ -8,9 +8,8 @@ logic resolution; all evaluation and propagation are handled by the Simulator.
 """
 
 from __future__ import annotations
-from abc import ABC
 from enum import IntEnum
-from .logic_value import LogicValue
+from .logic_value import LogicValue, ZERO, ONE
 from .node import Node
 
 
@@ -32,51 +31,30 @@ class LogicDeviceKind(IntEnum):
         return f"LogicDeviceKind.{self.name}"
 
 
-class LogicDevice(ABC):
+GND_DEVICE_KIND: LogicDeviceKind = LogicDeviceKind.GND
+VDD_DEVICE_KIND: LogicDeviceKind = LogicDeviceKind.VDD
+INPUT_DEVICE_KIND: LogicDeviceKind = LogicDeviceKind.INPUT
+PROBE_DEVICE_KIND: LogicDeviceKind = LogicDeviceKind.PROBE
+PORT_DEVICE_KIND: LogicDeviceKind = LogicDeviceKind.PORT
+
+
+# pylint: disable=too-few-public-methods
+class LogicDevice:
     """
-    Abstract class for single-terminal logic devices.
+    Base class for single-terminal logic devices.
 
     Each LogicDevice is associated with one terminal Node and may drive one
     LogicValue onto it. This class defines only structural information. The
     Simulator is responsible for resolving all electrical behaviour.
     """
 
-    __slots__ = ("_id", "_kind", "_node")
+    __slots__ = ("id_", "kind", "node")
 
     def __init__(self, device_id: int, kind: LogicDeviceKind, node: Node) -> None:
         """Create a new LogicDevice with a terminal Node."""
-        self._id = device_id
-        self._kind = kind
-        self._node = node
-
-    # --------------------------------------------------------------------------
-    # Properties
-    # --------------------------------------------------------------------------
-
-    @property
-    def id(self) -> int:
-        """Return the unique identifier of this LogicDevice."""
-        return self._id
-
-    @property
-    def kind(self) -> LogicDeviceKind:
-        """Return the kind of this LogicDevice."""
-        return self._kind
-
-    @property
-    def terminal(self) -> Node:
-        """Return the terminal Node of this LogicDevice."""
-        return self._node
-
-    @property
-    def terminal_default_value(self) -> LogicValue:
-        """Return the default LogicValue of the terminal Node."""
-        return self._node.default_value
-
-    @property
-    def terminal_resolved_value(self) -> LogicValue:
-        """Return the resolved LogicValue of the terminal Node."""
-        return self._node.resolved_value
+        self.id_: int = device_id
+        self.kind: LogicDeviceKind = kind
+        self.node: Node = node
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -86,9 +64,9 @@ class LogicDevice(ABC):
         """Return a debug representation of this LogicDevice."""
         name = self.__class__.__name__
         return (
-            f"<{name} id={self._id} kind={self._kind!r} "
-            f"terminal_default_value={self._node.default_value!r} "
-            f"terminal_resolved_value={self._node.resolved_value!r}>"
+            f"<{name} id={self.id_} kind={self.kind!r} "
+            f"terminal_default_value={self.node.default_value!r} "
+            f"terminal_resolved_value={self.node.resolved_value!r}>"
         )
 
 
@@ -105,8 +83,8 @@ class VDD(LogicDevice):
     """
 
     def __init__(self, device_id: int, node: Node) -> None:
-        super().__init__(device_id, LogicDeviceKind.VDD, node)
-        self._node.set_default_value(LogicValue.ONE)
+        super().__init__(device_id, VDD_DEVICE_KIND, node)
+        self.node.default_value = ONE
 
 
 # ------------------------------------------------------------------------------
@@ -122,8 +100,8 @@ class GND(LogicDevice):
     """
 
     def __init__(self, device_id: int, node: Node) -> None:
-        super().__init__(device_id, LogicDeviceKind.GND, node)
-        self._node.set_default_value(LogicValue.ZERO)
+        super().__init__(device_id, GND_DEVICE_KIND, node)
+        self.node.default_value = ZERO
 
 
 # ------------------------------------------------------------------------------
@@ -139,11 +117,11 @@ class Input(LogicDevice):
     """
 
     def __init__(self, device_id: int, node: Node) -> None:
-        super().__init__(device_id, LogicDeviceKind.INPUT, node)
+        super().__init__(device_id, INPUT_DEVICE_KIND, node)
 
     def set_value(self, value: LogicValue) -> None:
         """Set the LogicValue driven by this Input device."""
-        self._node.set_default_value(value)
+        self.node.default_value = value
 
 
 # ------------------------------------------------------------------------------
@@ -159,11 +137,11 @@ class Probe(LogicDevice):
     """
 
     def __init__(self, device_id: int, node: Node) -> None:
-        super().__init__(device_id, LogicDeviceKind.PROBE, node)
+        super().__init__(device_id, PROBE_DEVICE_KIND, node)
 
     def sample(self) -> LogicValue:
         """Return the current resolved LogicValue of the terminal Node."""
-        return self._node.resolved_value
+        return self.node.resolved_value
 
 
 # ------------------------------------------------------------------------------
@@ -179,4 +157,4 @@ class Port(LogicDevice):
     """
 
     def __init__(self, device_id: int, node: Node) -> None:
-        super().__init__(device_id, LogicDeviceKind.PORT, node)
+        super().__init__(device_id, PORT_DEVICE_KIND, node)

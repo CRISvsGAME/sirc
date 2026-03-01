@@ -1,6 +1,5 @@
-from .logic_value import LogicValue as LogicValue
+from .logic_value import LogicValue as LogicValue, ONE as ONE, ZERO as ZERO
 from .node import Node as Node
-from abc import ABC
 from enum import IntEnum
 
 class LogicDeviceKind(IntEnum):
@@ -10,18 +9,17 @@ class LogicDeviceKind(IntEnum):
     PROBE = 3
     PORT = 4
 
-class LogicDevice(ABC):
+GND_DEVICE_KIND: LogicDeviceKind
+VDD_DEVICE_KIND: LogicDeviceKind
+INPUT_DEVICE_KIND: LogicDeviceKind
+PROBE_DEVICE_KIND: LogicDeviceKind
+PORT_DEVICE_KIND: LogicDeviceKind
+
+class LogicDevice:
+    id_: int
+    kind: LogicDeviceKind
+    node: Node
     def __init__(self, device_id: int, kind: LogicDeviceKind, node: Node) -> None: ...
-    @property
-    def id(self) -> int: ...
-    @property
-    def kind(self) -> LogicDeviceKind: ...
-    @property
-    def terminal(self) -> Node: ...
-    @property
-    def terminal_default_value(self) -> LogicValue: ...
-    @property
-    def terminal_resolved_value(self) -> LogicValue: ...
 
 class VDD(LogicDevice):
     def __init__(self, device_id: int, node: Node) -> None: ...

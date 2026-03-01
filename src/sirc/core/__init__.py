@@ -2,7 +2,20 @@
 
 from .logic_value import LogicValue, ZERO, ONE, X, Z, RESOLVE_TABLE
 from .node import Node, NodeKind, BASE_NODE_KIND, GATE_NODE_KIND
-from .logic_device import LogicDevice, LogicDeviceKind, VDD, GND, Input, Probe, Port
+from .logic_device import (
+    LogicDevice,
+    LogicDeviceKind,
+    VDD,
+    GND,
+    Input,
+    Probe,
+    Port,
+    GND_DEVICE_KIND,
+    VDD_DEVICE_KIND,
+    INPUT_DEVICE_KIND,
+    PROBE_DEVICE_KIND,
+    PORT_DEVICE_KIND,
+)
 from .transistor import Transistor, TransistorKind, NMOS, PMOS
 
 __all__ = [
@@ -23,6 +36,11 @@ __all__ = [
     "Input",
     "Probe",
     "Port",
+    "GND_DEVICE_KIND",
+    "VDD_DEVICE_KIND",
+    "INPUT_DEVICE_KIND",
+    "PROBE_DEVICE_KIND",
+    "PORT_DEVICE_KIND",
     "Transistor",
     "TransistorKind",
     "NMOS",

@@ -266,7 +266,7 @@ class DeviceSimulator:
                 if default_value:
                     values |= default_value
 
-            resolved_value = LogicValue.resolve_all_byte(values)
+            resolved_value = LogicValue.resolve_mask(values)
 
             for node_id in component:
                 node = nodes[node_id]

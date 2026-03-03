@@ -17,10 +17,6 @@ class NodeKind(IntEnum):
     BASE = 0
     GATE = 1
 
-    def __str__(self) -> str:
-        """Return compact string form ('0', '1')."""
-        return str(self.value)
-
     def __repr__(self) -> str:
         """Return readable debug representation."""
         return f"NodeKind.{self.name}"

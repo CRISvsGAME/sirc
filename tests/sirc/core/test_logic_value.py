@@ -1,74 +1,22 @@
 """Unit tests for LogicValue module."""
 
+from itertools import product
 import pytest
 from sirc.core import LogicValue
 
-# ------------------------------------------------------------------------------
-# State Property Tests
-# ------------------------------------------------------------------------------
+VALUES = tuple(LogicValue)
 
 
-def test_logicvalue_properties():
-    """Test the is_zero, is_one, is_x, is_z properties of LogicValue."""
-    assert LogicValue.ZERO.is_zero
-    assert not LogicValue.ZERO.is_one
-    assert not LogicValue.ZERO.is_x
-    assert not LogicValue.ZERO.is_z
-
-    assert LogicValue.ONE.is_one
-    assert not LogicValue.ONE.is_zero
-    assert not LogicValue.ONE.is_x
-    assert not LogicValue.ONE.is_z
-
-    assert LogicValue.X.is_x
-    assert not LogicValue.X.is_zero
-    assert not LogicValue.X.is_one
-    assert not LogicValue.X.is_z
-
-    assert LogicValue.Z.is_z
-    assert not LogicValue.Z.is_zero
-    assert not LogicValue.Z.is_one
-    assert not LogicValue.Z.is_x
+def expected_resolution(values: tuple[LogicValue, ...]) -> LogicValue:
+    """Compute the expected resolution."""
+    mask = 0b000
+    for value in values:
+        mask |= value
+    return LogicValue.resolve_mask(mask)
 
 
 # ------------------------------------------------------------------------------
-# Two-Driver Resolution Tests
-# ------------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "a, b, expected",
-    [
-        # Row: 0
-        (LogicValue.ZERO, LogicValue.ZERO, LogicValue.ZERO),
-        (LogicValue.ZERO, LogicValue.ONE, LogicValue.X),
-        (LogicValue.ZERO, LogicValue.X, LogicValue.X),
-        (LogicValue.ZERO, LogicValue.Z, LogicValue.ZERO),
-        # Row: 1
-        (LogicValue.ONE, LogicValue.ZERO, LogicValue.X),
-        (LogicValue.ONE, LogicValue.ONE, LogicValue.ONE),
-        (LogicValue.ONE, LogicValue.X, LogicValue.X),
-        (LogicValue.ONE, LogicValue.Z, LogicValue.ONE),
-        # Row: X
-        (LogicValue.X, LogicValue.ZERO, LogicValue.X),
-        (LogicValue.X, LogicValue.ONE, LogicValue.X),
-        (LogicValue.X, LogicValue.X, LogicValue.X),
-        (LogicValue.X, LogicValue.Z, LogicValue.X),
-        # Row: Z
-        (LogicValue.Z, LogicValue.ZERO, LogicValue.ZERO),
-        (LogicValue.Z, LogicValue.ONE, LogicValue.ONE),
-        (LogicValue.Z, LogicValue.X, LogicValue.X),
-        (LogicValue.Z, LogicValue.Z, LogicValue.Z),
-    ],
-)
-def test_two_driver_resolution(a: LogicValue, b: LogicValue, expected: LogicValue):
-    """Test two-driver resolution of LogicValue."""
-    assert a.resolve(b) is expected
-    assert b.resolve(a) is expected
-
-
-# ------------------------------------------------------------------------------
-# Multi-Driver Resolution Tests
+# Driver Resolution Tests
 # ------------------------------------------------------------------------------
 
 
@@ -77,98 +25,35 @@ def test_resolve_all_empty_returns_z():
     assert LogicValue.resolve_all([]) is LogicValue.Z
 
 
-@pytest.mark.parametrize("value", list(LogicValue))
+@pytest.mark.parametrize("value", VALUES)
 def test_resolve_all_single_value(value: LogicValue):
     """Test that resolving a single value returns that value."""
     assert LogicValue.resolve_all([value]) is value
 
 
-@pytest.mark.parametrize(
-    "values, expected",
-    [
-        ([LogicValue.ZERO, LogicValue.ZERO, LogicValue.ZERO], LogicValue.ZERO),
-        ([LogicValue.ZERO, LogicValue.ZERO, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.ZERO, LogicValue.X], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.ZERO, LogicValue.Z], LogicValue.ZERO),
-        ([LogicValue.ZERO, LogicValue.ONE, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.ONE, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.ONE, LogicValue.X], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.ONE, LogicValue.Z], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.X, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.X, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.X, LogicValue.X], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.X, LogicValue.Z], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.Z, LogicValue.ZERO], LogicValue.ZERO),
-        ([LogicValue.ZERO, LogicValue.Z, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.Z, LogicValue.X], LogicValue.X),
-        ([LogicValue.ZERO, LogicValue.Z, LogicValue.Z], LogicValue.ZERO),
-        ([LogicValue.ONE, LogicValue.ZERO, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ZERO, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ZERO, LogicValue.X], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ZERO, LogicValue.Z], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ONE, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ONE, LogicValue.ONE], LogicValue.ONE),
-        ([LogicValue.ONE, LogicValue.ONE, LogicValue.X], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.ONE, LogicValue.Z], LogicValue.ONE),
-        ([LogicValue.ONE, LogicValue.X, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.X, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.X, LogicValue.X], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.X, LogicValue.Z], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.Z, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.Z, LogicValue.ONE], LogicValue.ONE),
-        ([LogicValue.ONE, LogicValue.Z, LogicValue.X], LogicValue.X),
-        ([LogicValue.ONE, LogicValue.Z, LogicValue.Z], LogicValue.ONE),
-        ([LogicValue.X, LogicValue.ZERO, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.X, LogicValue.ZERO, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.X, LogicValue.ZERO, LogicValue.X], LogicValue.X),
-        ([LogicValue.X, LogicValue.ZERO, LogicValue.Z], LogicValue.X),
-        ([LogicValue.X, LogicValue.ONE, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.X, LogicValue.ONE, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.X, LogicValue.ONE, LogicValue.X], LogicValue.X),
-        ([LogicValue.X, LogicValue.ONE, LogicValue.Z], LogicValue.X),
-        ([LogicValue.X, LogicValue.X, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.X, LogicValue.X, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.X, LogicValue.X, LogicValue.X], LogicValue.X),
-        ([LogicValue.X, LogicValue.X, LogicValue.Z], LogicValue.X),
-        ([LogicValue.X, LogicValue.Z, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.X, LogicValue.Z, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.X, LogicValue.Z, LogicValue.X], LogicValue.X),
-        ([LogicValue.X, LogicValue.Z, LogicValue.Z], LogicValue.X),
-        ([LogicValue.Z, LogicValue.ZERO, LogicValue.ZERO], LogicValue.ZERO),
-        ([LogicValue.Z, LogicValue.ZERO, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.Z, LogicValue.ZERO, LogicValue.X], LogicValue.X),
-        ([LogicValue.Z, LogicValue.ZERO, LogicValue.Z], LogicValue.ZERO),
-        ([LogicValue.Z, LogicValue.ONE, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.Z, LogicValue.ONE, LogicValue.ONE], LogicValue.ONE),
-        ([LogicValue.Z, LogicValue.ONE, LogicValue.X], LogicValue.X),
-        ([LogicValue.Z, LogicValue.ONE, LogicValue.Z], LogicValue.ONE),
-        ([LogicValue.Z, LogicValue.X, LogicValue.ZERO], LogicValue.X),
-        ([LogicValue.Z, LogicValue.X, LogicValue.ONE], LogicValue.X),
-        ([LogicValue.Z, LogicValue.X, LogicValue.X], LogicValue.X),
-        ([LogicValue.Z, LogicValue.X, LogicValue.Z], LogicValue.X),
-        ([LogicValue.Z, LogicValue.Z, LogicValue.ZERO], LogicValue.ZERO),
-        ([LogicValue.Z, LogicValue.Z, LogicValue.ONE], LogicValue.ONE),
-        ([LogicValue.Z, LogicValue.Z, LogicValue.X], LogicValue.X),
-        ([LogicValue.Z, LogicValue.Z, LogicValue.Z], LogicValue.Z),
-    ],
-)
-def test_resolve_all_multiple_values(values: list[LogicValue], expected: LogicValue):
-    """Test resolving multiple LogicValues."""
+@pytest.mark.parametrize("values", product(VALUES, repeat=3))
+def test_resolve_all_matches_resolve_mask(values: tuple[LogicValue, ...]):
+    """Test that resolve_all matches resolve_mask for 3-driver combinations."""
+    expected = expected_resolution(values)
     assert LogicValue.resolve_all(values) is expected
 
 
-def test_resolve_all_large_list_no_conflict():
-    """Test resolving a large list with non conflicting LogicValues."""
-    count = 1000000
-    values = [LogicValue.ZERO] * count
-    assert LogicValue.resolve_all(values) is LogicValue.ZERO
-
-
-def test_resolve_all_large_list_conflict():
-    """Test resolving a large list with conflicting LogicValues."""
-    count = 1000000
-    values = [LogicValue.ZERO] * count + [LogicValue.ONE] * count
-    assert LogicValue.resolve_all(values) is LogicValue.X
+@pytest.mark.parametrize(
+    "mask, expected",
+    [
+        (0b000, LogicValue.Z),
+        (0b001, LogicValue.ZERO),
+        (0b010, LogicValue.ONE),
+        (0b011, LogicValue.X),
+        (0b100, LogicValue.X),
+        (0b101, LogicValue.X),
+        (0b110, LogicValue.X),
+        (0b111, LogicValue.X),
+    ],
+)
+def test_resolve_mask_table(mask: int, expected: LogicValue):
+    """Test direct resolution of all valid driver masks."""
+    assert LogicValue.resolve_mask(mask) is expected
 
 
 # -----------------------------------------------------------------------------

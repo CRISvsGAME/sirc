@@ -22,10 +22,6 @@ class LogicDeviceKind(IntEnum):
     PROBE = 3
     PORT = 4
 
-    def __str__(self) -> str:
-        """Return compact string form ('0', '1', '2', '3', '4')."""
-        return str(self.value)
-
     def __repr__(self) -> str:
         """Return readable debug representation."""
         return f"LogicDeviceKind.{self.name}"
@@ -43,9 +39,9 @@ class LogicDevice:
     """
     Base class for single-terminal logic devices.
 
-    Each LogicDevice is associated with one terminal Node and may drive one
-    LogicValue onto it. This class defines only structural information. The
-    Simulator is responsible for resolving all electrical behaviour.
+    Each LogicDevice is associated with exactly one terminal Node. Subclasses
+    may drive that Node, observe it, or expose it as a passive connection point.
+    All logic resolution and propagation are handled by the Simulator.
     """
 
     __slots__ = ("id_", "kind", "node")
@@ -63,7 +59,7 @@ class LogicDevice:
     def __repr__(self) -> str:
         """Return a debug representation of this LogicDevice."""
         name = self.__class__.__name__
-        return f"<{name} id={self.id_} kind={self.kind!r} " f"terminal={self.node!r}>"
+        return f"<{name} id={self.id_} kind={self.kind!r} terminal={self.node!r}>"
 
 
 # ------------------------------------------------------------------------------

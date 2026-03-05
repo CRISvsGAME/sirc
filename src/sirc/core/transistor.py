@@ -23,10 +23,6 @@ class TransistorKind(IntEnum):
     NMOS = 0
     PMOS = 1
 
-    def __str__(self) -> str:
-        """Return compact string form ('0', '1')."""
-        return str(self.value)
-
     def __repr__(self) -> str:
         """Return readable debug representation."""
         return f"TransistorKind.{self.name}"
@@ -45,9 +41,9 @@ class Transistor(ABC):
         - source: One side of the controlled channel
         - drain : The other side of the controlled channel
 
-    This class defines only structural information and simple access helpers.
-    Device-specific conduction rules are implemented by subclasses. All logic
-    evaluation and node-group management is performed entirely by the Simulator.
+    This class defines structural information only. Device-specific conduction
+    rules are implemented by subclasses. All logic evaluation and node-group
+    management are performed entirely by the Simulator.
     """
 
     __slots__ = ("id_", "kind", "gate", "source", "drain")
@@ -64,9 +60,9 @@ class Transistor(ABC):
         """
         Create a new transistor with gate, source, and drain Nodes.
 
-        The provided Nodes must have correct kinds (GATE for gate, BASE for
-        source and drain) and must be distinct. Nodes are registered and managed
-        by the Simulator as part of the circuit topology.
+        The Simulator is expected to provide correctly typed and distinct Nodes:
+        GATE for gate, BASE for source and drain. Nodes are registered and
+        managed by the Simulator as part of the circuit topology.
         """
         self.id_: int = transistor_id
         self.kind: TransistorKind = kind
@@ -89,17 +85,6 @@ class Transistor(ABC):
         """
         raise NotImplementedError("Must be implemented by subclasses.")
 
-    @abstractmethod
-    def is_conducting_byte(self) -> int:
-        """
-        Return 1 if this transistor is currently conducting, else 0.
-
-        This method is used by the Simulator's optimised dynamic topology
-        builder to efficiently determine whether the transistor's conduction
-        state has changed since the last evaluation.
-        """
-        raise NotImplementedError("Must be implemented by subclasses.")
-
     # --------------------------------------------------------------------------
     # Debug Representation
     # --------------------------------------------------------------------------
@@ -118,6 +103,7 @@ class Transistor(ABC):
 # ------------------------------------------------------------------------------
 
 
+# pylint: disable=too-few-public-methods
 class NMOS(Transistor):
     """
     NMOS transistor device.
@@ -135,15 +121,13 @@ class NMOS(Transistor):
     def is_conducting(self) -> bool:
         return self.gate.resolved_value is ONE
 
-    def is_conducting_byte(self) -> int:
-        return 1 if self.gate.resolved_value is ONE else 0
-
 
 # ------------------------------------------------------------------------------
 # PMOS Transistor Implementation
 # ------------------------------------------------------------------------------
 
 
+# pylint: disable=too-few-public-methods
 class PMOS(Transistor):
     """
     PMOS transistor device.
@@ -160,6 +144,3 @@ class PMOS(Transistor):
 
     def is_conducting(self) -> bool:
         return self.gate.resolved_value is ZERO
-
-    def is_conducting_byte(self) -> int:
-        return 1 if self.gate.resolved_value is ZERO else 0

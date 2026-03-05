@@ -1,151 +1,112 @@
 """Unit tests for LogicDevice module."""
 
+from typing import Protocol
 import pytest
-from sirc.core import LogicValue, Node, LogicDeviceKind, VDD, GND, Input, Probe, Port
+from sirc.core import (
+    LogicValue,
+    Node,
+    LogicDevice,
+    LogicDeviceKind,
+    VDD,
+    GND,
+    Input,
+    Probe,
+    Port,
+)
 
-# ------------------------------------------------------------------------------
-# Rail Tests
-# ------------------------------------------------------------------------------
-
-
-def test_vdd_id_and_kind():
-    """VDD must have correct device identification and kind."""
-    v = VDD(1, Node(1))
-    assert v.id_ == 1
-    assert v.kind is LogicDeviceKind.VDD
-
-
-def test_vdd_default_state():
-    """VDD must drive LogicValue.ONE."""
-    v = VDD(1, Node(1))
-    assert v.node.default_value is LogicValue.ONE
-    assert isinstance(v.node, Node)
-
-
-def test_gnd_id_and_kind():
-    """GND must have correct device identification and kind."""
-    g = GND(1, Node(1))
-    assert g.id_ == 1
-    assert g.kind is LogicDeviceKind.GND
+DEVICES: list[tuple[type[LogicDevice], int, int, LogicDeviceKind]] = [
+    (VDD, 1, 1, LogicDeviceKind.VDD),
+    (GND, 2, 2, LogicDeviceKind.GND),
+    (Input, 3, 3, LogicDeviceKind.INPUT),
+    (Probe, 4, 4, LogicDeviceKind.PROBE),
+    (Port, 5, 5, LogicDeviceKind.PORT),
+]
 
 
-def test_gnd_default_state():
-    """GND must drive LogicValue.ZERO."""
-    g = GND(1, Node(1))
-    assert g.node.default_value is LogicValue.ZERO
-    assert isinstance(g.node, Node)
+# pylint: disable=too-few-public-methods
+class LogicDeviceConstructor(Protocol):
+    """Callable constructor for LogicDevice subclasses used in tests."""
 
-
-def test_vdd_and_gnd_nodes_are_unique():
-    """VDD and GND must have distinct terminal Nodes."""
-    v = VDD(1, Node(1))
-    g = GND(2, Node(2))
-    assert v.node is not g.node
+    def __call__(self, device_id: int, node: Node) -> LogicDevice: ...
 
 
 # ------------------------------------------------------------------------------
-# Input Device Tests
+# Construction Tests
 # ------------------------------------------------------------------------------
 
 
-def test_input_id_and_kind():
-    """Input must have correct device identification and kind."""
-    i = Input(1, Node(1))
-    assert i.id_ == 1
-    assert i.kind is LogicDeviceKind.INPUT
-
-
-def test_input_default_state():
-    """Input terminal must default to LogicValue.Z."""
-    i = Input(1, Node(1))
-    assert i.node.default_value is LogicValue.Z
-    assert isinstance(i.node, Node)
-
-
-def test_input_set_value_updates_value():
-    """Input must drive the value set by set_value()."""
-    i = Input(1, Node(1))
-    i.set_value(LogicValue.ONE)
-    assert i.node.default_value is LogicValue.ONE
-    i.set_value(LogicValue.ZERO)
-    assert i.node.default_value is LogicValue.ZERO
-    i.set_value(LogicValue.X)
-    assert i.node.default_value is LogicValue.X
-    i.set_value(LogicValue.Z)
-    assert i.node.default_value is LogicValue.Z
-
-
-def test_input_terminal_node_is_unique():
-    """Each Input instance must have its own unique terminal Node."""
-    a = Input(1, Node(1))
-    b = Input(2, Node(2))
-    assert a.node is not b.node
+@pytest.mark.parametrize("device_class, device_id, node_id, expected_kind", DEVICES)
+def test_device_stores_id_and_kind(
+    device_class: LogicDeviceConstructor,
+    device_id: int,
+    node_id: int,
+    expected_kind: LogicDeviceKind,
+):
+    """A LogicDevice must store the provided ID and device kind."""
+    device = device_class(device_id, Node(node_id))
+    assert device.id_ == device_id
+    assert device.kind is expected_kind
 
 
 # ------------------------------------------------------------------------------
-# Probe Device Tests
+# Driving Behaviour Tests
 # ------------------------------------------------------------------------------
 
 
-def test_probe_id_and_kind():
-    """Probe must have correct device identification and kind."""
-    p = Probe(1, Node(1))
-    assert p.id_ == 1
-    assert p.kind is LogicDeviceKind.PROBE
+def test_vdd_drives_one():
+    """VDD must drive LogicValue.ONE onto its terminal Node."""
+    vdd = VDD(1, Node(1))
+    assert vdd.node.default_value is LogicValue.ONE
 
 
-def test_probe_default_state():
-    """Probe terminal must default to LogicValue.Z."""
-    p = Probe(1, Node(1))
-    assert p.node.default_value is LogicValue.Z
-    assert isinstance(p.node, Node)
+def test_gnd_drives_zero():
+    """GND must drive LogicValue.ZERO onto its terminal Node."""
+    gnd = GND(1, Node(1))
+    assert gnd.node.default_value is LogicValue.ZERO
 
 
-def test_probe_sample_reads_node_value():
-    """Probe.sample() must return the LogicValue present on its terminal Node."""
-    p = Probe(1, Node(1))
-    n = p.node
-    n.resolved_value = LogicValue.ONE
-    assert p.sample() is LogicValue.ONE
-    n.resolved_value = LogicValue.ZERO
-    assert p.sample() is LogicValue.ZERO
-    n.resolved_value = LogicValue.X
-    assert p.sample() is LogicValue.X
-    n.resolved_value = LogicValue.Z
-    assert p.sample() is LogicValue.Z
+def test_input_defaults_to_z():
+    """Input terminal Node must default to LogicValue.Z."""
+    inp = Input(1, Node(1))
+    assert inp.node.default_value is LogicValue.Z
 
 
-def test_probe_terminal_node_is_unique():
-    """Each Probe instance must have its own unique terminal Node."""
-    a = Probe(1, Node(1))
-    b = Probe(2, Node(2))
-    assert a.node is not b.node
+@pytest.mark.parametrize("value", tuple(LogicValue))
+def test_input_set_value(value: LogicValue):
+    """Input.set_value() must update the terminal Node default_value."""
+    inp = Input(1, Node(1))
+    inp.set_value(value)
+    assert inp.node.default_value is value
 
 
 # ------------------------------------------------------------------------------
-# Port Device Tests
+# Probe Tests
 # ------------------------------------------------------------------------------
 
 
-def test_port_id_and_kind():
-    """Port must have correct device identification and kind."""
-    p = Port(1, Node(1))
-    assert p.id_ == 1
-    assert p.kind is LogicDeviceKind.PORT
+def test_probe_defaults_to_z():
+    """Probe terminal Node must default to LogicValue.Z."""
+    probe = Probe(1, Node(1))
+    assert probe.node.default_value is LogicValue.Z
 
 
-def test_port_default_state():
-    """Port terminal must default to LogicValue.Z."""
-    p = Port(1, Node(1))
-    assert p.node.default_value is LogicValue.Z
-    assert isinstance(p.node, Node)
+@pytest.mark.parametrize("value", tuple(LogicValue))
+def test_probe_sample(value: LogicValue):
+    """Probe.sample() must return the terminal Node resolved_value."""
+    probe = Probe(1, Node(1))
+    probe.node.resolved_value = value
+    assert probe.sample() is value
 
 
-def test_port_terminal_node_is_unique():
-    """Each Port instance must have its own unique terminal Node."""
-    a = Port(1, Node(1))
-    b = Port(2, Node(2))
-    assert a.node is not b.node
+# ------------------------------------------------------------------------------
+# Port Tests
+# ------------------------------------------------------------------------------
+
+
+def test_port_defaults_to_z():
+    """Port terminal Node must default to LogicValue.Z."""
+    port = Port(1, Node(1))
+    assert port.node.default_value is LogicValue.Z
 
 
 # ------------------------------------------------------------------------------
@@ -153,13 +114,16 @@ def test_port_terminal_node_is_unique():
 # ------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("device_class", [VDD, GND, Input, Probe, Port])
-def test_repr_contains_class_value_terminal_info(device_class: type):
-    """__repr__ must include class name and terminal information."""
-    d = device_class(1, Node(1))
-    r = repr(d)
-    assert r.startswith(f"<{device_class.__name__} ")
-    assert f"id={d.id_}" in r
-    assert f"kind=LogicDeviceKind.{d.kind.name}" in r
-    assert "terminal=" in r
-    assert r.endswith(">")
+@pytest.mark.parametrize("device_class, device_id, node_id, expected_kind", DEVICES)
+def test_repr(
+    device_class: LogicDeviceConstructor,
+    device_id: int,
+    node_id: int,
+    expected_kind: LogicDeviceKind,
+):
+    """__repr__ must include class name, ID, kind, and terminal Node."""
+    device = device_class(device_id, Node(node_id))
+    assert repr(device) == (
+        f"<{type(device).__name__} id={device_id} kind={expected_kind!r} "
+        f"terminal={device.node!r}>"
+    )

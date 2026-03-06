@@ -132,14 +132,41 @@ class TransistorFactory:
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
 class DeviceSimulatorState:
-    """Device Simulator State"""
+    """
+    Device Simulator State
+
+    Centralised mutable state owned by DeviceSimulator. This structure stores
+    both simulation entities and graph representations used during evaluation.
+
+    Properties:
+
+    nodes:
+        Dense list of Node instances.
+        Invariant: node.id_ == index in this list.
+
+    devices:
+        Dense list of LogicDevice instances.
+        Invariant: device.id_ == index in this list.
+
+    transistors:
+        Dense list of Transistor instances.
+        Invariant: transistor.id_ == index in this list.
+
+    wire_edges:
+        Static undirected edge list representing user-defined connections.
+        Each edge is stored canonically as (min_node_id, max_node_id).
+
+    wire_edge_index:
+        Mapping from canonical edge -> index in wire_edges.
+        Provides O(1) lookup, deduplication, and swap-remove deletion.
+    """
 
     __slots__ = (
         "nodes",
         "devices",
         "transistors",
-        "wires",
-        "wires_cache",
+        "wire_edges",
+        "wire_edge_index",
         "static_neighbors",
         "dynamic_neighbors",
         "components",
@@ -152,8 +179,8 @@ class DeviceSimulatorState:
         self.nodes: list[Node] = []
         self.devices: list[LogicDevice] = []
         self.transistors: list[Transistor] = []
-        self.wires: list[tuple[int, int]] = []
-        self.wires_cache: dict[tuple[int, int], int] = {}
+        self.wire_edges: list[tuple[int, int]] = []
+        self.wire_edge_index: dict[tuple[int, int], int] = {}
         self.static_neighbors: list[list[int]] = []
         self.dynamic_neighbors: list[list[int]] = []
         self.components: list[list[int]] = []

@@ -1,24 +1,56 @@
 """Unit tests for Transistor module."""
 
-from sirc.core import LogicValue, Node, NodeKind, Transistor, NMOS, PMOS
+from typing import Protocol
+import pytest
+from sirc.core import LogicValue, Node, NodeKind, Transistor, TransistorKind, NMOS, PMOS
+
+TRANSISTORS: list[tuple[type[Transistor], int, int, int, int, TransistorKind]] = [
+    (NMOS, 1, 1, 2, 3, TransistorKind.NMOS),
+    (PMOS, 2, 4, 5, 6, TransistorKind.PMOS),
+]
+
+
+# pylint: disable=too-few-public-methods
+class TransistorConstructor(Protocol):
+    """Callable constructor for Transistor subclasses used in tests."""
+
+    def __call__(
+        self,
+        transistor_id: int,
+        gate: Node,
+        source: Node,
+        drain: Node,
+    ) -> Transistor: ...
+
 
 # ------------------------------------------------------------------------------
 # Transistor Construction Tests
 # ------------------------------------------------------------------------------
 
 
-def test_transistor_has_three_distinct_nodes():
-    """Each Transistor must have unique gate, source, and drain Nodes."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2)
-    d = Node(3)
-    t = NMOS(1, g, s, d)
-    assert isinstance(t.gate, Node)
-    assert isinstance(t.source, Node)
-    assert isinstance(t.drain, Node)
-    assert t.gate is not t.source
-    assert t.gate is not t.drain
-    assert t.source is not t.drain
+@pytest.mark.parametrize(
+    "transistor_class, transistor_id, gate_id, source_id, drain_id, expected_kind",
+    TRANSISTORS,
+)
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+def test_transistor_stores_id_kind_and_terminals(
+    transistor_class: TransistorConstructor,
+    transistor_id: int,
+    gate_id: int,
+    source_id: int,
+    drain_id: int,
+    expected_kind: TransistorKind,
+):
+    """A transistor must store its ID, kind, and terminal Nodes."""
+    g = Node(gate_id, kind=NodeKind.GATE)
+    s = Node(source_id)
+    d = Node(drain_id)
+    t = transistor_class(transistor_id, g, s, d)
+    assert t.id_ == transistor_id
+    assert t.kind is expected_kind
+    assert t.gate is g
+    assert t.source is s
+    assert t.drain is d
 
 
 # ------------------------------------------------------------------------------
@@ -26,24 +58,23 @@ def test_transistor_has_three_distinct_nodes():
 # ------------------------------------------------------------------------------
 
 
-def test_nmos_conduction_rules():
+@pytest.mark.parametrize(
+    "gate_value, expected",
+    [
+        (LogicValue.ZERO, False),
+        (LogicValue.ONE, True),
+        (LogicValue.X, False),
+        (LogicValue.Z, False),
+    ],
+)
+def test_nmos_conduction_rules(gate_value: LogicValue, expected: bool):
     """NMOS must conduct only when gate is LogicValue.ONE."""
     g = Node(1, kind=NodeKind.GATE)
     s = Node(2)
     d = Node(3)
     t = NMOS(1, g, s, d)
-    # Gate = 0 → off
-    t.gate.resolved_value = LogicValue.ZERO
-    assert not t.is_conducting()
-    # Gate = 1 → on
-    t.gate.resolved_value = LogicValue.ONE
-    assert t.is_conducting()
-    # Gate = X → off
-    t.gate.resolved_value = LogicValue.X
-    assert not t.is_conducting()
-    # Gate = Z → off
-    t.gate.resolved_value = LogicValue.Z
-    assert not t.is_conducting()
+    t.gate.resolved_value = gate_value
+    assert t.is_conducting() is expected
 
 
 # ------------------------------------------------------------------------------
@@ -51,24 +82,23 @@ def test_nmos_conduction_rules():
 # ------------------------------------------------------------------------------
 
 
-def test_pmos_conduction_rules():
+@pytest.mark.parametrize(
+    "gate_value, expected",
+    [
+        (LogicValue.ZERO, True),
+        (LogicValue.ONE, False),
+        (LogicValue.X, False),
+        (LogicValue.Z, False),
+    ],
+)
+def test_pmos_conduction_rules(gate_value: LogicValue, expected: bool):
     """PMOS must conduct only when gate is LogicValue.ZERO."""
     g = Node(1, kind=NodeKind.GATE)
     s = Node(2)
     d = Node(3)
     t = PMOS(1, g, s, d)
-    # Gate = 0 → on
-    t.gate.resolved_value = LogicValue.ZERO
-    assert t.is_conducting()
-    # Gate = 1 → off
-    t.gate.resolved_value = LogicValue.ONE
-    assert not t.is_conducting()
-    # Gate = X → off
-    t.gate.resolved_value = LogicValue.X
-    assert not t.is_conducting()
-    # Gate = Z → off
-    t.gate.resolved_value = LogicValue.Z
-    assert not t.is_conducting()
+    t.gate.resolved_value = gate_value
+    assert t.is_conducting() is expected
 
 
 # ------------------------------------------------------------------------------
@@ -76,20 +106,26 @@ def test_pmos_conduction_rules():
 # ------------------------------------------------------------------------------
 
 
-def test_nmos_and_pmos_share_same_interface():
-    """NMOS and PMOS must both be Transistor subclasses with is_conducting()."""
-    ng = Node(1, kind=NodeKind.GATE)
-    ns = Node(2)
-    nd = Node(3)
-    nmos = NMOS(1, ng, ns, nd)
-    pg = Node(4, kind=NodeKind.GATE)
-    ps = Node(5)
-    pd = Node(6)
-    pmos = PMOS(1, pg, ps, pd)
-    assert isinstance(nmos, Transistor)
-    assert isinstance(pmos, Transistor)
-    assert hasattr(nmos, "is_conducting")
-    assert hasattr(pmos, "is_conducting")
+@pytest.mark.parametrize(
+    "transistor_class, transistor_id, gate_id, source_id, drain_id, expected_kind",
+    TRANSISTORS,
+)
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+def test_nmos_and_pmos_share_same_interface(
+    transistor_class: TransistorConstructor,
+    transistor_id: int,
+    gate_id: int,
+    source_id: int,
+    drain_id: int,
+    expected_kind: TransistorKind,
+):
+    """NMOS and PMOS must both be Transistor subclasses."""
+    g = Node(gate_id, kind=NodeKind.GATE)
+    s = Node(source_id)
+    d = Node(drain_id)
+    t = transistor_class(transistor_id, g, s, d)
+    assert isinstance(t, Transistor)
+    assert t.kind is expected_kind
 
 
 # ------------------------------------------------------------------------------
@@ -97,70 +133,25 @@ def test_nmos_and_pmos_share_same_interface():
 # ------------------------------------------------------------------------------
 
 
-def test_nmos_repr_format():
-    """NMOS __repr__ must include class name and terminal fields."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2)
-    d = Node(3)
-    t = NMOS(1, g, s, d)
-    r = repr(t)
-    assert "NMOS" in r
-    assert "gate=" in r
-    assert "source=" in r
-    assert "drain=" in r
-    assert r.startswith("<NMOS ")
-    assert r.endswith(">")
-
-
-def test_pmos_repr_format():
-    """PMOS __repr__ must include class name and terminal fields."""
-    g = Node(1, kind=NodeKind.GATE)
-    s = Node(2)
-    d = Node(3)
-    t = PMOS(1, g, s, d)
-    r = repr(t)
-    assert "PMOS" in r
-    assert "gate=" in r
-    assert "source=" in r
-    assert "drain=" in r
-    assert r.startswith("<PMOS ")
-    assert r.endswith(">")
-
-
-# ------------------------------------------------------------------------------
-# Isolation Tests
-# ------------------------------------------------------------------------------
-
-
-def test_transistor_nodes_are_not_shared_between_instances():
-    """Each Transistor instance must have its own unique Nodes."""
-    ng = Node(1, kind=NodeKind.GATE)
-    ns = Node(2)
-    nd = Node(3)
-    nmos = NMOS(1, ng, ns, nd)
-    pg = Node(4, kind=NodeKind.GATE)
-    ps = Node(5)
-    pd = Node(6)
-    pmos = PMOS(1, pg, ps, pd)
-    assert nmos.gate is not pmos.gate
-    assert nmos.source is not pmos.source
-    assert nmos.drain is not pmos.drain
-
-
-# ------------------------------------------------------------------------------
-# Stress & Stability Tests
-# ------------------------------------------------------------------------------
-
-
-def test_multiple_transistors_construction():
-    """Creating many Transistor instances must preserve node identity uniqueness."""
-    ts = [
-        NMOS(i, Node(i * 3 + 1, kind=NodeKind.GATE), Node(i * 3 + 2), Node(i * 3 + 3))
-        for i in range(1000)
-    ]
-    ids = {id(t.gate) for t in ts}
-    assert len(ids) == 1000
-    ids = {id(t.source) for t in ts}
-    assert len(ids) == 1000
-    ids = {id(t.drain) for t in ts}
-    assert len(ids) == 1000
+@pytest.mark.parametrize(
+    "transistor_class, transistor_id, gate_id, source_id, drain_id, expected_kind",
+    TRANSISTORS,
+)
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+def test_transistor_repr_format(
+    transistor_class: TransistorConstructor,
+    transistor_id: int,
+    gate_id: int,
+    source_id: int,
+    drain_id: int,
+    expected_kind: TransistorKind,
+):
+    """Transistor __repr__ must return the expected debug representation."""
+    g = Node(gate_id, kind=NodeKind.GATE)
+    s = Node(source_id)
+    d = Node(drain_id)
+    t = transistor_class(transistor_id, g, s, d)
+    assert repr(t) == (
+        f"<{type(t).__name__} id={transistor_id} kind={expected_kind!r} "
+        f"gate={g!r} source={s!r} drain={d!r}>"
+    )

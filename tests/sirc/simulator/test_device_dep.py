@@ -1,4 +1,4 @@
-"""Unit tests for Device Simulator Dependency Module."""
+"""Unit tests for Device Simulator Dependency module."""
 
 from sirc.core import LogicValue, NodeKind, LogicDeviceKind, TransistorKind
 from sirc.simulator import (

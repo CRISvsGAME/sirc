@@ -126,13 +126,13 @@ class DeviceSimulator:
 
         edge = (a, b)
         state = self._state
-        wires_cache = state.wires_cache
+        wire_edge_index = state.wire_edge_index
 
-        if edge not in wires_cache:
-            wires = state.wires
-            index = len(wires)
-            wires.append(edge)
-            wires_cache[edge] = index
+        if edge not in wire_edge_index:
+            wire_edges = state.wire_edges
+            index = len(wire_edges)
+            wire_edges.append(edge)
+            wire_edge_index[edge] = index
 
     def disconnect(self, node_a: Node, node_b: Node) -> None:
         """Remove an undirected wire connection between two Nodes."""
@@ -147,15 +147,19 @@ class DeviceSimulator:
 
         edge = (a, b)
         state = self._state
-        wires_cache = state.wires_cache
-        index = wires_cache.pop(edge, None)
+        wire_edge_index = state.wire_edge_index
+        index = wire_edge_index.pop(edge, None)
 
         if index is not None:
-            wires = state.wires
-            last_edge = wires.pop()
-            if index < len(wires):
-                wires[index] = last_edge
-                wires_cache[last_edge] = index
+            wire_edges = state.wire_edges
+            last_edge = wire_edges.pop()
+            if index < len(wire_edges):
+                wire_edges[index] = last_edge
+                wire_edge_index[last_edge] = index
+
+    # --------------------------------------------------------------------------
+    # Simulation Logic
+    # --------------------------------------------------------------------------
 
     def _build_static_topology(self) -> None:
         """Build Static Topology"""
@@ -165,7 +169,7 @@ class DeviceSimulator:
         static_neighbors: list[list[int]] = [[] for _ in range(node_count)]
         dynamic_neighbors: list[list[int]] = [[] for _ in range(node_count)]
 
-        for a, b in state.wires:
+        for a, b in state.wire_edges:
             static_neighbors[a].append(b)
             static_neighbors[b].append(a)
 

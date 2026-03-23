@@ -159,6 +159,14 @@ class DeviceSimulatorState:
     wire_edge_index:
         Mapping from canonical edge -> index in wire_edges.
         Provides O(1) lookup, deduplication, and swap-remove deletion.
+
+    wire_edge_a:
+        Dense endpoint array storing the first node ID of each wire edge.
+        Invariant: wire_edge_a[i] == wire_edges[i][0].
+
+    wire_edge_b:
+        Dense endpoint array storing the second node ID of each wire edge.
+        Invariant: wire_edge_b[i] == wire_edges[i][1].
     """
 
     __slots__ = (
@@ -167,6 +175,8 @@ class DeviceSimulatorState:
         "transistors",
         "wire_edges",
         "wire_edge_index",
+        "wire_edge_a",
+        "wire_edge_b",
         "static_neighbors",
         "dynamic_neighbors",
         "components",
@@ -181,6 +191,8 @@ class DeviceSimulatorState:
         self.transistors: list[Transistor] = []
         self.wire_edges: list[tuple[int, int]] = []
         self.wire_edge_index: dict[tuple[int, int], int] = {}
+        self.wire_edge_a: list[int] = []
+        self.wire_edge_b: list[int] = []
         self.static_neighbors: list[list[int]] = []
         self.dynamic_neighbors: list[list[int]] = []
         self.components: list[list[int]] = []

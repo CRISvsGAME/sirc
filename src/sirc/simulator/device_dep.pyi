@@ -32,6 +32,8 @@ class DeviceSimulatorState:
     transistors: list[Transistor]
     wire_edges: list[tuple[int, int]]
     wire_edge_index: dict[tuple[int, int], int]
+    wire_edge_a: list[int]
+    wire_edge_b: list[int]
     static_neighbors: list[list[int]]
     dynamic_neighbors: list[list[int]]
     components: list[list[int]]

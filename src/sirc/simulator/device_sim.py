@@ -126,8 +126,8 @@ class DeviceSimulator:
 
         return (a, b)
 
-    def connect(self, node_a: Node, node_b: Node) -> None:
-        """Record an undirected wire connection between two Nodes."""
+    def _connect_aos(self, node_a: Node, node_b: Node) -> None:
+        """Record a canonical undirected wire edge in the AoS edge list."""
         edge = self._canonical_edge(node_a, node_b)
 
         if edge is None:
@@ -142,8 +142,8 @@ class DeviceSimulator:
             wire_edges.append(edge)
             wire_edge_index[edge] = index
 
-    def disconnect(self, node_a: Node, node_b: Node) -> None:
-        """Remove an undirected wire connection between two Nodes."""
+    def _disconnect_aos(self, node_a: Node, node_b: Node) -> None:
+        """Remove a canonical undirected wire edge from the AoS edge list."""
         edge = self._canonical_edge(node_a, node_b)
 
         if edge is None:
@@ -159,6 +159,14 @@ class DeviceSimulator:
             if index < len(wire_edges):
                 wire_edges[index] = last_edge
                 wire_edge_index[last_edge] = index
+
+    def connect(self, node_a: Node, node_b: Node) -> None:
+        """Record an undirected wire connection between two Nodes."""
+        self._connect_aos(node_a, node_b)
+
+    def disconnect(self, node_a: Node, node_b: Node) -> None:
+        """Remove an undirected wire connection between two Nodes."""
+        self._disconnect_aos(node_a, node_b)
 
     # --------------------------------------------------------------------------
     # Simulation Logic

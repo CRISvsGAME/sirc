@@ -113,18 +113,26 @@ class DeviceSimulator:
     # Logical Connection
     # --------------------------------------------------------------------------
 
-    def connect(self, node_a: Node, node_b: Node) -> None:
-        """Record an undirected wire connection between two Nodes."""
+    def _canonical_edge(self, node_a: Node, node_b: Node) -> tuple[int, int] | None:
+        """Return a canonical edge tuple (min_id, max_id) for two Nodes."""
         a = node_a.id_
         b = node_b.id_
 
         if a == b:
-            return
+            return None
 
         if a > b:
             a, b = b, a
 
-        edge = (a, b)
+        return (a, b)
+
+    def connect(self, node_a: Node, node_b: Node) -> None:
+        """Record an undirected wire connection between two Nodes."""
+        edge = self._canonical_edge(node_a, node_b)
+
+        if edge is None:
+            return
+
         state = self._state
         wire_edge_index = state.wire_edge_index
 
@@ -136,16 +144,11 @@ class DeviceSimulator:
 
     def disconnect(self, node_a: Node, node_b: Node) -> None:
         """Remove an undirected wire connection between two Nodes."""
-        a = node_a.id_
-        b = node_b.id_
+        edge = self._canonical_edge(node_a, node_b)
 
-        if a == b:
+        if edge is None:
             return
 
-        if a > b:
-            a, b = b, a
-
-        edge = (a, b)
         state = self._state
         wire_edge_index = state.wire_edge_index
         index = wire_edge_index.pop(edge, None)

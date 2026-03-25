@@ -160,6 +160,46 @@ class DeviceSimulator:
                 wire_edges[index] = last_edge
                 wire_edge_index[last_edge] = index
 
+    def _connect_soa(self, node_a: Node, node_b: Node) -> None:
+        """Record a canonical undirected wire edge in the SoA edge lists."""
+        edge = self._canonical_edge(node_a, node_b)
+
+        if edge is None:
+            return
+
+        state = self._state
+        wire_edge_index = state.wire_edge_index
+
+        if edge not in wire_edge_index:
+            a, b = edge
+            wire_edge_a = state.wire_edge_a
+            wire_edge_b = state.wire_edge_b
+            index = len(wire_edge_a)
+            wire_edge_a.append(a)
+            wire_edge_b.append(b)
+            wire_edge_index[edge] = index
+
+    def _disconnect_soa(self, node_a: Node, node_b: Node) -> None:
+        """Remove a canonical undirected wire edge from the SoA edge lists."""
+        edge = self._canonical_edge(node_a, node_b)
+
+        if edge is None:
+            return
+
+        state = self._state
+        wire_edge_index = state.wire_edge_index
+        index = wire_edge_index.pop(edge, None)
+
+        if index is not None:
+            wire_edge_a = state.wire_edge_a
+            wire_edge_b = state.wire_edge_b
+            last_edge_a = wire_edge_a.pop()
+            last_edge_b = wire_edge_b.pop()
+            if index < len(wire_edge_a):
+                wire_edge_a[index] = last_edge_a
+                wire_edge_b[index] = last_edge_b
+                wire_edge_index[(last_edge_a, last_edge_b)] = index
+
     def connect(self, node_a: Node, node_b: Node) -> None:
         """Record an undirected wire connection between two Nodes."""
         self._connect_aos(node_a, node_b)

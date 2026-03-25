@@ -167,6 +167,14 @@ class DeviceSimulatorState:
     wire_edge_b:
         Dense endpoint array storing the second node ID of each wire edge.
         Invariant: wire_edge_b[i] == wire_edges[i][1].
+
+    wire_edge_keys:
+        Dense array storing the packed canonical key for each wire edge.
+        Invariant: wire_edge_keys[i] == (wire_edge_a[i] << 32) | wire_edge_b[i].
+
+    wire_edge_key_index:
+        Mapping from packed canonical edge key -> index in wire_edge_keys.
+        Provides O(1) lookup, deduplication, and swap-remove deletion.
     """
 
     __slots__ = (
@@ -177,6 +185,8 @@ class DeviceSimulatorState:
         "wire_edge_index",
         "wire_edge_a",
         "wire_edge_b",
+        "wire_edge_keys",
+        "wire_edge_key_index",
         "static_neighbors",
         "dynamic_neighbors",
         "components",
@@ -193,6 +203,8 @@ class DeviceSimulatorState:
         self.wire_edge_index: dict[tuple[int, int], int] = {}
         self.wire_edge_a: list[int] = []
         self.wire_edge_b: list[int] = []
+        self.wire_edge_keys: list[int] = []
+        self.wire_edge_key_index: dict[int, int] = {}
         self.static_neighbors: list[list[int]] = []
         self.dynamic_neighbors: list[list[int]] = []
         self.components: list[list[int]] = []

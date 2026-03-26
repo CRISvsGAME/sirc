@@ -126,6 +126,19 @@ class DeviceSimulator:
 
         return (a, b)
 
+    def _canonical_key(self, node_a: Node, node_b: Node) -> int | None:
+        """Return a packed canonical edge key (a << 32) | b for two Nodes."""
+        a = node_a.id_
+        b = node_b.id_
+
+        if a == b:
+            return None
+
+        if a > b:
+            a, b = b, a
+
+        return (a << 32) | b
+
     def _connect_aos(self, node_a: Node, node_b: Node) -> None:
         """Record a canonical undirected wire edge in the AoS edge list."""
         edge = self._canonical_edge(node_a, node_b)

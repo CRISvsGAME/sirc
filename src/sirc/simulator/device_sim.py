@@ -213,6 +213,40 @@ class DeviceSimulator:
                 wire_edge_b[index] = last_edge_b
                 wire_edge_index[(last_edge_a, last_edge_b)] = index
 
+    def _connect_psoa(self, node_a: Node, node_b: Node) -> None:
+        """Record a canonical undirected wire edge in the Packed SoA edge list."""
+        key = self._canonical_key(node_a, node_b)
+
+        if key is None:
+            return
+
+        state = self._state
+        wire_edge_key_index = state.wire_edge_key_index
+
+        if key not in wire_edge_key_index:
+            wire_edge_keys = state.wire_edge_keys
+            index = len(wire_edge_keys)
+            wire_edge_keys.append(key)
+            wire_edge_key_index[key] = index
+
+    def _disconnect_psoa(self, node_a: Node, node_b: Node) -> None:
+        """Remove a canonical undirected wire edge from the Packed SoA edge list."""
+        key = self._canonical_key(node_a, node_b)
+
+        if key is None:
+            return
+
+        state = self._state
+        wire_edge_key_index = state.wire_edge_key_index
+        index = wire_edge_key_index.pop(key, None)
+
+        if index is not None:
+            wire_edge_keys = state.wire_edge_keys
+            last_key = wire_edge_keys.pop()
+            if index < len(wire_edge_keys):
+                wire_edge_keys[index] = last_key
+                wire_edge_key_index[last_key] = index
+
     def connect(self, node_a: Node, node_b: Node) -> None:
         """Record an undirected wire connection between two Nodes."""
         self._connect_aos(node_a, node_b)

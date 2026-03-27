@@ -259,8 +259,8 @@ class DeviceSimulator:
     # Simulation Logic
     # --------------------------------------------------------------------------
 
-    def _build_static_topology(self) -> None:
-        """Build Static Topology"""
+    def _build_static_topology_aos(self) -> None:
+        """Build Static Topology using AoS edge list."""
         state = self._state
         node_count = len(state.nodes)
 
@@ -274,6 +274,10 @@ class DeviceSimulator:
         state.static_neighbors = static_neighbors
         state.dynamic_neighbors = dynamic_neighbors
         state.transistor_conducting = [False] * len(state.transistors)
+
+    def _build_static_topology(self) -> None:
+        """Build Static Topology"""
+        self._build_static_topology_aos()
 
     def _build_dynamic_topology(self) -> bool:
         """Build Dynamic Topology"""

@@ -275,6 +275,22 @@ class DeviceSimulator:
         state.dynamic_neighbors = dynamic_neighbors
         state.transistor_conducting = [False] * len(state.transistors)
 
+    def _build_static_topology_soa(self) -> None:
+        """Build Static Topology using SoA edge lists."""
+        state = self._state
+        node_count = len(state.nodes)
+
+        static_neighbors: list[list[int]] = [[] for _ in range(node_count)]
+        dynamic_neighbors: list[list[int]] = [[] for _ in range(node_count)]
+
+        for a, b in zip(state.wire_edge_a, state.wire_edge_b):
+            static_neighbors[a].append(b)
+            static_neighbors[b].append(a)
+
+        state.static_neighbors = static_neighbors
+        state.dynamic_neighbors = dynamic_neighbors
+        state.transistor_conducting = [False] * len(state.transistors)
+
     def _build_static_topology(self) -> None:
         """Build Static Topology"""
         self._build_static_topology_aos()

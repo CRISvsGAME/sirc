@@ -94,8 +94,11 @@ class DeviceSimulator:
         once per created transistor; registration order must match allocated IDs.
         """
         state = self._state
+        nodes = state.nodes
         state.transistors.append(transistor)
-        state.nodes.extend((transistor.gate, transistor.source, transistor.drain))
+        nodes.append(transistor.gate)
+        nodes.append(transistor.source)
+        nodes.append(transistor.drain)
 
     def create_nmos(self) -> NMOS:
         """Create and register a new NMOS transistor."""

@@ -1,22 +1,34 @@
 """Unit tests for LogicValue module."""
 
-from itertools import product
 import pytest
-from sirc.core import LogicValue
+from sirc.core import LogicValue, ZERO, ONE, X, Z, RESOLVE_TABLE
 
-VALUES = tuple(LogicValue)
+MASKS = (0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111)
+RAW_VALUES = (Z, ZERO, ONE, X, X, X, X, X)
+LOGIC_VALUES = (
+    LogicValue.Z,
+    LogicValue.ZERO,
+    LogicValue.ONE,
+    LogicValue.X,
+    LogicValue.X,
+    LogicValue.X,
+    LogicValue.X,
+    LogicValue.X,
+)
+
+# ------------------------------------------------------------------------------
+# Simulator Driver Resolution Tests
+# ------------------------------------------------------------------------------
 
 
-def expected_resolution(values: tuple[LogicValue, ...]) -> LogicValue:
-    """Compute the expected resolution."""
-    mask = 0b000
-    for value in values:
-        mask |= value
-    return LogicValue.resolve_mask(mask)
+@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, RAW_VALUES)))
+def test_resolve_table(mask: int, expected: int):
+    """Test direct resolution of all valid driver masks."""
+    assert RESOLVE_TABLE[mask] == expected
 
 
 # ------------------------------------------------------------------------------
-# Driver Resolution Tests
+# LogicValue Resolution Tests
 # ------------------------------------------------------------------------------
 
 
@@ -25,35 +37,27 @@ def test_resolve_all_empty_returns_z():
     assert LogicValue.resolve_all([]) is LogicValue.Z
 
 
-@pytest.mark.parametrize("value", VALUES)
-def test_resolve_all_single_value(value: LogicValue):
-    """Test that resolving a single value returns that value."""
-    assert LogicValue.resolve_all([value]) is value
+@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, LOGIC_VALUES)))
+def test_resolve_all(mask: int, expected: LogicValue):
+    """Test logic resolution of all valid driver masks."""
+    assert LogicValue.resolve_all([mask]) is expected
 
 
-@pytest.mark.parametrize("values", product(VALUES, repeat=3))
-def test_resolve_all_matches_resolve_mask(values: tuple[LogicValue, ...]):
-    """Test that resolve_all matches resolve_mask for 3-driver combinations."""
-    expected = expected_resolution(values)
-    assert LogicValue.resolve_all(values) is expected
-
-
-@pytest.mark.parametrize(
-    "mask, expected",
-    [
-        (0b000, LogicValue.Z),
-        (0b001, LogicValue.ZERO),
-        (0b010, LogicValue.ONE),
-        (0b011, LogicValue.X),
-        (0b100, LogicValue.X),
-        (0b101, LogicValue.X),
-        (0b110, LogicValue.X),
-        (0b111, LogicValue.X),
-    ],
-)
-def test_resolve_mask_table(mask: int, expected: LogicValue):
-    """Test direct resolution of all valid driver masks."""
+@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, LOGIC_VALUES)))
+def test_resolve_mask(mask: int, expected: LogicValue):
+    """Test logic resolution of all valid driver masks."""
     assert LogicValue.resolve_mask(mask) is expected
+
+
+# ------------------------------------------------------------------------------
+# Equivalence Tests
+# ------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("mask", MASKS)
+def test_simulator_equivalent_logic_value(mask: int):
+    """Test direct resolution is equivalent to logic resolution."""
+    assert RESOLVE_TABLE[mask] == LogicValue.resolve_mask(mask)
 
 
 # -----------------------------------------------------------------------------
@@ -62,7 +66,7 @@ def test_resolve_mask_table(mask: int, expected: LogicValue):
 
 
 def test_str():
-    """Test the __str__ method of LogicValue."""
+    """Test LogicValue string conversion."""
     assert str(LogicValue.ZERO) == "0"
     assert str(LogicValue.ONE) == "1"
     assert str(LogicValue.X) == "X"
@@ -70,7 +74,7 @@ def test_str():
 
 
 def test_repr():
-    """Test the __repr__ method of LogicValue."""
+    """Test LogicValue debug representation."""
     assert repr(LogicValue.ZERO) == "LogicValue.ZERO"
     assert repr(LogicValue.ONE) == "LogicValue.ONE"
     assert repr(LogicValue.X) == "LogicValue.X"

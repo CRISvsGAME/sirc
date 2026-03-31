@@ -1,16 +1,21 @@
-from .logic_value import LogicValue as LogicValue, Z as Z
+from ..simulator import DeviceSimulatorState as DeviceSimulatorState
+from .logic_value import LogicValue as LogicValue
 from enum import IntEnum
+from typing import Final
+
+BASE_NODE_KIND: Final[int]
+GATE_NODE_KIND: Final[int]
 
 class NodeKind(IntEnum):
-    BASE = 0
-    GATE = 1
-
-BASE_NODE_KIND: NodeKind
-GATE_NODE_KIND: NodeKind
+    BASE = BASE_NODE_KIND
+    GATE = GATE_NODE_KIND
 
 class Node:
     id_: int
-    kind: NodeKind
-    default_value: LogicValue
-    resolved_value: LogicValue
-    def __init__(self, node_id: int, kind: NodeKind = ...) -> None: ...
+    def __init__(self, state: DeviceSimulatorState, node_id: int) -> None: ...
+    @property
+    def kind(self) -> NodeKind: ...
+    @property
+    def default_value(self) -> LogicValue: ...
+    @property
+    def resolved_value(self) -> LogicValue: ...

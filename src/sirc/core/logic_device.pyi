@@ -1,39 +1,25 @@
-from .logic_value import LogicValue as LogicValue, ONE as ONE, ZERO as ZERO
+from ..simulator import DeviceSimulatorState as DeviceSimulatorState
 from .node import Node as Node
 from enum import IntEnum
+from typing import Final
+
+GND_DEVICE_KIND: Final[int]
+VDD_DEVICE_KIND: Final[int]
+INPUT_DEVICE_KIND: Final[int]
+PROBE_DEVICE_KIND: Final[int]
+PORT_DEVICE_KIND: Final[int]
 
 class LogicDeviceKind(IntEnum):
-    GND = 0
-    VDD = 1
-    INPUT = 2
-    PROBE = 3
-    PORT = 4
-
-GND_DEVICE_KIND: LogicDeviceKind
-VDD_DEVICE_KIND: LogicDeviceKind
-INPUT_DEVICE_KIND: LogicDeviceKind
-PROBE_DEVICE_KIND: LogicDeviceKind
-PORT_DEVICE_KIND: LogicDeviceKind
+    GND = GND_DEVICE_KIND
+    VDD = VDD_DEVICE_KIND
+    INPUT = INPUT_DEVICE_KIND
+    PROBE = PROBE_DEVICE_KIND
+    PORT = PORT_DEVICE_KIND
 
 class LogicDevice:
     id_: int
-    kind: LogicDeviceKind
-    node: Node
-    def __init__(self, device_id: int, kind: LogicDeviceKind, node: Node) -> None: ...
-
-class VDD(LogicDevice):
-    def __init__(self, device_id: int, node: Node) -> None: ...
-
-class GND(LogicDevice):
-    def __init__(self, device_id: int, node: Node) -> None: ...
-
-class Input(LogicDevice):
-    def __init__(self, device_id: int, node: Node) -> None: ...
-    def set_value(self, value: LogicValue) -> None: ...
-
-class Probe(LogicDevice):
-    def __init__(self, device_id: int, node: Node) -> None: ...
-    def sample(self) -> LogicValue: ...
-
-class Port(LogicDevice):
-    def __init__(self, device_id: int, node: Node) -> None: ...
+    def __init__(self, state: DeviceSimulatorState, device_id: int) -> None: ...
+    @property
+    def node(self) -> Node: ...
+    @property
+    def kind(self) -> LogicDeviceKind: ...

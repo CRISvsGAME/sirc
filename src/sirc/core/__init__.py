@@ -14,8 +14,6 @@ from .logic_device import (
 from .transistor import (
     Transistor,
     TransistorKind,
-    NMOS,
-    PMOS,
     NMOS_TRANSISTOR_KIND,
     PMOS_TRANSISTOR_KIND,
 )
@@ -40,8 +38,6 @@ __all__ = [
     "PORT_DEVICE_KIND",
     "Transistor",
     "TransistorKind",
-    "NMOS",
-    "PMOS",
     "NMOS_TRANSISTOR_KIND",
     "PMOS_TRANSISTOR_KIND",
 ]

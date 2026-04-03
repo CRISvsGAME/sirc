@@ -29,7 +29,6 @@ class NodeKind(IntEnum):
         return f"NodeKind.{self.name}"
 
 
-# pylint: disable=too-few-public-methods
 class Node:
     """
     A Node is a lightweight public handle for a simulator-owned node.

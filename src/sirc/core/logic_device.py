@@ -39,7 +39,6 @@ class LogicDeviceKind(IntEnum):
         return f"LogicDeviceKind.{self.name}"
 
 
-# pylint: disable=too-few-public-methods
 class LogicDevice:
     """
     A lightweight public handle for a simulator-owned single-terminal device.
@@ -57,15 +56,15 @@ class LogicDevice:
         self.id_: int = device_id
 
     @property
+    def kind(self) -> LogicDeviceKind:
+        """Return the LogicDeviceKind of this LogicDevice."""
+        return LogicDeviceKind(self._state.device_kinds[self.id_])
+
+    @property
     def node(self) -> Node:
         """Return the terminal Node of this LogicDevice."""
         node_id = self._state.device_nodes[self.id_]
         return self._state.nodes[node_id]
-
-    @property
-    def kind(self) -> LogicDeviceKind:
-        """Return the LogicDeviceKind of this LogicDevice."""
-        return LogicDeviceKind(self._state.device_kinds[self.id_])
 
     # --------------------------------------------------------------------------
     # Debug Representation
@@ -73,4 +72,4 @@ class LogicDevice:
 
     def __repr__(self) -> str:
         """Return a debug representation of this LogicDevice."""
-        return f"<LogicDevice id={self.id_} kind={self.kind!r} terminal={self.node!r}>"
+        return f"<LogicDevice id={self.id_} kind={self.kind!r} node={self.node!r}>"

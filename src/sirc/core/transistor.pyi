@@ -1,30 +1,25 @@
-import abc
-from .logic_value import ONE as ONE, ZERO as ZERO
+from ..simulator import DeviceSimulatorState as DeviceSimulatorState
 from .node import Node as Node
-from abc import ABC, abstractmethod
 from enum import IntEnum
+from typing import Final
+
+NMOS_TRANSISTOR_KIND: Final[int]
+PMOS_TRANSISTOR_KIND: Final[int]
 
 class TransistorKind(IntEnum):
-    NMOS = 0
-    PMOS = 1
+    NMOS = NMOS_TRANSISTOR_KIND
+    PMOS = PMOS_TRANSISTOR_KIND
 
-NMOS_TRANSISTOR_KIND: TransistorKind
-PMOS_TRANSISTOR_KIND: TransistorKind
-
-class Transistor(ABC, metaclass=abc.ABCMeta):
+class Transistor:
     id_: int
-    kind: TransistorKind
-    gate: Node
-    source: Node
-    drain: Node
-    def __init__(self, transistor_id: int, kind: TransistorKind, gate: Node, source: Node, drain: Node) -> None: ...
-    @abstractmethod
-    def is_conducting(self) -> bool: ...
-
-class NMOS(Transistor):
-    def __init__(self, transistor_id: int, gate: Node, source: Node, drain: Node) -> None: ...
-    def is_conducting(self) -> bool: ...
-
-class PMOS(Transistor):
-    def __init__(self, transistor_id: int, gate: Node, source: Node, drain: Node) -> None: ...
-    def is_conducting(self) -> bool: ...
+    def __init__(self, state: DeviceSimulatorState, transistor_id: int) -> None: ...
+    @property
+    def kind(self) -> TransistorKind: ...
+    @property
+    def gate(self) -> Node: ...
+    @property
+    def source(self) -> Node: ...
+    @property
+    def drain(self) -> Node: ...
+    @property
+    def conducting(self) -> bool: ...

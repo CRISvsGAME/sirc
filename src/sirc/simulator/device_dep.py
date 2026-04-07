@@ -1,133 +1,9 @@
 """SIRC Device Simulator Dependency Module."""
 
 from __future__ import annotations
-from ..core.node import Node, NodeKind
-from ..core.logic_device import LogicDevice, VDD, GND, Input, Probe, Port
-from ..core.transistor import Transistor, NMOS, PMOS
-
-
-class IdentificationFactory:
-    """Identification Factory"""
-
-    __slots__ = ("_next_node_id", "_next_device_id", "_next_transistor_id")
-
-    def __init__(self) -> None:
-        """Initialize the Identification Factory."""
-        self._next_node_id: int = 0
-        self._next_device_id: int = 0
-        self._next_transistor_id: int = 0
-
-    def allocate_node_id(self) -> int:
-        """Allocate a unique Node ID."""
-        node_id = self._next_node_id
-        self._next_node_id += 1
-        return node_id
-
-    def allocate_device_id(self) -> int:
-        """Allocate a unique Device ID."""
-        device_id = self._next_device_id
-        self._next_device_id += 1
-        return device_id
-
-    def allocate_transistor_id(self) -> int:
-        """Allocate a unique Transistor ID."""
-        transistor_id = self._next_transistor_id
-        self._next_transistor_id += 1
-        return transistor_id
-
-
-class NodeFactory:
-    """Node Factory"""
-
-    __slots__ = ("_id_factory",)
-
-    def __init__(self, id_factory: IdentificationFactory) -> None:
-        """Initialize the Node Factory."""
-        self._id_factory = id_factory
-
-    def create_base_node(self) -> Node:
-        """Create a new BASE Node with a unique ID."""
-        node_id = self._id_factory.allocate_node_id()
-        return Node(node_id, NodeKind.BASE)
-
-    def create_gate_node(self) -> Node:
-        """Create a new GATE Node with a unique ID."""
-        node_id = self._id_factory.allocate_node_id()
-        return Node(node_id, NodeKind.GATE)
-
-
-class LogicDeviceFactory:
-    """Logic Device Factory"""
-
-    __slots__ = ("_id_factory", "_node_factory")
-
-    def __init__(
-        self, id_factory: IdentificationFactory, node_factory: NodeFactory
-    ) -> None:
-        """Initialize the Logic Device Factory."""
-        self._id_factory = id_factory
-        self._node_factory = node_factory
-
-    def create_vdd(self) -> VDD:
-        """Create a new VDD device with a unique ID and terminal Node."""
-        device_id = self._id_factory.allocate_device_id()
-        node = self._node_factory.create_base_node()
-        return VDD(device_id, node)
-
-    def create_gnd(self) -> GND:
-        """Create a new GND device with a unique ID and terminal Node."""
-        device_id = self._id_factory.allocate_device_id()
-        node = self._node_factory.create_base_node()
-        return GND(device_id, node)
-
-    def create_input(self) -> Input:
-        """Create a new Input device with a unique ID and terminal Node."""
-        device_id = self._id_factory.allocate_device_id()
-        node = self._node_factory.create_base_node()
-        return Input(device_id, node)
-
-    def create_probe(self) -> Probe:
-        """Create a new Probe device with a unique ID and terminal Node."""
-        device_id = self._id_factory.allocate_device_id()
-        node = self._node_factory.create_base_node()
-        return Probe(device_id, node)
-
-    def create_port(self) -> Port:
-        """Create a new Port device with a unique ID and terminal Node."""
-        device_id = self._id_factory.allocate_device_id()
-        node = self._node_factory.create_base_node()
-        return Port(device_id, node)
-
-
-class TransistorFactory:
-    """Transistor Factory"""
-
-    __slots__ = ("_id_factory", "_node_factory")
-
-    def __init__(
-        self, id_factory: IdentificationFactory, node_factory: NodeFactory
-    ) -> None:
-        """Initialize the Transistor Factory."""
-        self._id_factory = id_factory
-        self._node_factory = node_factory
-
-    def create_nmos(self) -> NMOS:
-        """Create a new NMOS transistor with a unique ID and terminal Nodes."""
-        node_factory = self._node_factory
-        transistor_id = self._id_factory.allocate_transistor_id()
-        gate = node_factory.create_gate_node()
-        source = node_factory.create_base_node()
-        drain = node_factory.create_base_node()
-        return NMOS(transistor_id, gate, source, drain)
-
-    def create_pmos(self) -> PMOS:
-        """Create a new PMOS transistor with a unique ID and terminal Nodes."""
-        node_factory = self._node_factory
-        transistor_id = self._id_factory.allocate_transistor_id()
-        gate = node_factory.create_gate_node()
-        source = node_factory.create_base_node()
-        drain = node_factory.create_base_node()
-        return PMOS(transistor_id, gate, source, drain)
+from ..core.node import Node
+from ..core.logic_device import LogicDevice
+from ..core.transistor import Transistor
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
@@ -138,49 +14,104 @@ class DeviceSimulatorState:
     Centralised mutable state owned by DeviceSimulator. This structure stores
     both simulation entities and graph representations used during evaluation.
 
-    Properties:
-
+    Properties
+    ----------
     nodes:
-        Dense list of Node instances.
-        Invariant: node.id_ == index in this list.
+        Dense list of Node handles.
+        Invariant: nodes[i].id_ == i.
+        Nodes do not own runtime state; they read from node_* arrays.
+
+    node_kinds:
+        Dense array storing raw NodeKind values.
+        Invariant: node_kinds[node_id] is BASE_NODE_KIND or GATE_NODE_KIND.
+
+    node_default_values:
+        Dense array storing raw LogicValue-compatible integers for each Node.
+        Used as the node's baseline driver contribution before resolution.
+
+    node_resolved_values:
+        Dense array storing raw LogicValue-compatible integers for each Node.
+        Written by the simulator during evaluation and exposed through Node.
 
     devices:
-        Dense list of LogicDevice instances.
-        Invariant: device.id_ == index in this list.
+        Dense list of LogicDevice handles.
+        Invariant: devices[i].id_ == i.
+        Devices do not own runtime state; they read from device_* arrays.
+
+    device_kinds:
+        Dense array storing raw LogicDeviceKind values.
+        Invariant: device_kinds[device_id] identifies GND, VDD, INPUT, PROBE, or PORT.
+
+    device_nodes:
+        Dense array mapping each LogicDevice to its terminal Node.
+        Invariant: device_nodes[device_id] -> node_id.
 
     transistors:
-        Dense list of Transistor instances.
-        Invariant: transistor.id_ == index in this list.
+        Dense list of Transistor handles.
+        Invariant: transistors[i].id_ == i.
+        Transistors do not own runtime state; they read from transistor_* arrays.
+
+    transistor_kinds:
+        Dense array storing raw TransistorKind values.
+        Invariant: transistor_kinds[transistor_id] is NMOS_TRANSISTOR_KIND or PMOS_TRANSISTOR_KIND.
+
+    transistor_gates:
+        Dense array mapping each Transistor to its gate Node.
+        Invariant: transistor_gates[transistor_id] -> gate node_id.
+
+    transistor_sources:
+        Dense array mapping each Transistor to its source-side channel Node.
+        Invariant: transistor_sources[transistor_id] -> source node_id.
+
+    transistor_drains:
+        Dense array mapping each Transistor to its drain-side channel Node.
+        Invariant: transistor_drains[transistor_id] -> drain node_id.
+
+    transistor_conducting:
+        Dense array storing current simulator-computed conduction state.
+        Invariant: transistor_conducting[transistor_id] is True when the
+        source-drain channel is currently connected.
 
     wire_edges:
-        Static undirected edge list representing user-defined connections.
+        AoS static undirected edge list for user-defined Node connections.
         Each edge is stored canonically as (min_node_id, max_node_id).
 
     wire_edge_index:
-        Mapping from canonical edge -> index in wire_edges.
+        Mapping from canonical AoS edge tuple to index in wire_edges.
         Provides O(1) lookup, deduplication, and swap-remove deletion.
 
     wire_edge_a:
-        Dense endpoint array storing the first node ID of each wire edge.
-        Invariant: wire_edge_a[i] == wire_edges[i][0].
+        SoA static wire edge endpoint array.
+        Stores the first canonical node ID for each wire edge.
 
     wire_edge_b:
-        Dense endpoint array storing the second node ID of each wire edge.
-        Invariant: wire_edge_b[i] == wire_edges[i][1].
+        SoA static wire edge endpoint array.
+        Stores the second canonical node ID for each wire edge.
+        Invariant: (wire_edge_a[i], wire_edge_b[i]) matches wire_edges[i].
 
     wire_edge_keys:
-        Dense array storing the packed canonical key for each wire edge.
-        Invariant: wire_edge_keys[i] == (wire_edge_a[i] << 32) | wire_edge_b[i].
+        Packed-SoA static wire edge array.
+        Stores each canonical edge as (node_a << 32) | node_b.
 
     wire_edge_key_index:
-        Mapping from packed canonical edge key -> index in wire_edge_keys.
+        Mapping from packed canonical edge key to index in wire_edge_keys.
         Provides O(1) lookup, deduplication, and swap-remove deletion.
     """
 
     __slots__ = (
         "nodes",
+        "node_kinds",
+        "node_default_values",
+        "node_resolved_values",
         "devices",
+        "device_kinds",
+        "device_nodes",
         "transistors",
+        "transistor_kinds",
+        "transistor_gates",
+        "transistor_sources",
+        "transistor_drains",
+        "transistor_conducting",
         "wire_edges",
         "wire_edge_index",
         "wire_edge_a",
@@ -191,14 +122,23 @@ class DeviceSimulatorState:
         "dynamic_neighbors",
         "components",
         "component_id",
-        "transistor_conducting",
     )
 
     def __init__(self) -> None:
-        """Initialize the Device Simulator State."""
+        """Initialise the Device Simulator State."""
         self.nodes: list[Node] = []
+        self.node_kinds: list[int] = []
+        self.node_default_values: list[int] = []
+        self.node_resolved_values: list[int] = []
         self.devices: list[LogicDevice] = []
+        self.device_kinds: list[int] = []
+        self.device_nodes: list[int] = []
         self.transistors: list[Transistor] = []
+        self.transistor_kinds: list[int] = []
+        self.transistor_gates: list[int] = []
+        self.transistor_sources: list[int] = []
+        self.transistor_drains: list[int] = []
+        self.transistor_conducting: list[bool] = []
         self.wire_edges: list[tuple[int, int]] = []
         self.wire_edge_index: dict[tuple[int, int], int] = {}
         self.wire_edge_a: list[int] = []
@@ -209,4 +149,3 @@ class DeviceSimulatorState:
         self.dynamic_neighbors: list[list[int]] = []
         self.components: list[list[int]] = []
         self.component_id: list[int] = []
-        self.transistor_conducting: list[bool] = []

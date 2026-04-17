@@ -1,47 +1,77 @@
 """
 SIRC Core Logic Module.
 
-Defines the internal four-state digital logic values used throughout the SIRC
-simulation engine.
+Four-state logical value encoding and mask-based resolution primitives.
 
-SIRC uses a compact four-state digital logic model inspired by the value
-semantics of IEEE 1800-2023: logical low, logical high, unknown/conflicting, and
-undriven/high-impedance.
+Resolved-value domain
+---------------------
 
-Representation
---------------
-Logic values are encoded as 3-bit driver-presence masks:
+Representation:
+    A resolved value is one of the four canonical logical states:
 
-    ZERO = 0b001
-    ONE  = 0b010
-    X    = 0b100
-    Z    = 0b000
+        Z    = 0b000
+        ZERO = 0b001
+        ONE  = 0b010
+        X    = 0b100
 
-This encoding allows multiple drivers or partially accumulated masks to be
-combined using bitwise OR:
+    LogicValue is the semantic IntEnum wrapper for canonical resolved values.
 
-    bit 0 set (0b001) -> at least one ZERO driver present
-    bit 1 set (0b010) -> at least one ONE driver present
-    bit 2 set (0b100) -> at least one X driver present
-    zero mask (0b000) -> no non-Z drivers are present
+Meaning:
+    Z    -> no non-Z driver.
+    ZERO -> resolved logical 0.
+    ONE  -> resolved logical 1.
+    X    -> resolved unknown or conflict.
 
-Resolution
-----------
-The final resolved logic value is obtained by indexing RESOLVE_TABLE:
+    Every resolved value is a valid driver-presence mask and resolves to itself.
 
-    RESOLVE_TABLE[mask] -> raw LogicValue-compatible integer
-    0b000 -> Z
-    0b001 -> ZERO
-    0b010 -> ONE
-    0b011 -> X
-    0b100 -> X
-    0b101 -> X
-    0b110 -> X
-    0b111 -> X
+Driver-presence-mask domain
+---------------------------
 
-The simulator hot path uses the raw integer constants and RESOLVE_TABLE
-directly. LogicValue exists as a semantic/debug/API wrapper around the same
-integer domain.
+Representation:
+    A driver-presence mask is a non-bool int in the inclusive range 0b000..0b111.
+
+        bit 0 set -> at least one ZERO driver is present.
+        bit 1 set -> at least one ONE driver is present.
+        bit 2 set -> at least one X driver is present.
+        0b000     -> no non-Z driver is present.
+
+    Masks compose with bitwise OR.
+
+Meaning:
+    Driver-presence masks are accumulation values.
+
+    These masks are valid but non-canonical:
+
+        0b011 -> ZERO + ONE
+        0b101 -> ZERO + X
+        0b110 -> ONE  + X
+        0b111 -> ZERO + ONE + X
+
+Resolution:
+    RESOLVE_TABLE[mask] maps any valid mask to a canonical resolved value:
+
+        0b000 -> Z
+        0b001 -> ZERO
+        0b010 -> ONE
+        0b011 -> X
+        0b100 -> X
+        0b101 -> X
+        0b110 -> X
+        0b111 -> X
+
+Module contract
+---------------
+
+API boundary:
+    resolve(values) accepts LogicValue members, resolved raw values, accumulated
+    masks, or any valid mix of these.
+
+Execution contract:
+    Core logic is unchecked.
+    Callers must provide valid masks.
+    Simulator hot paths use raw integer constants and RESOLVE_TABLE directly.
+    LogicValue is for semantic/debug representation.
+    Validation belongs at external/public input boundaries, not here.
 """
 
 from __future__ import annotations

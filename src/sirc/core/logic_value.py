@@ -78,13 +78,13 @@ from __future__ import annotations
 from enum import IntEnum, unique
 from typing import Final, Iterable
 
+Z: Final[int] = 0b000
 ZERO: Final[int] = 0b001
 ONE: Final[int] = 0b010
 X: Final[int] = 0b100
-Z: Final[int] = 0b000
 
 RESOLVE_TABLE: Final[tuple[int, ...]] = (Z, ZERO, ONE, X, X, X, X, X)
-STRING_TABLE: Final[tuple[str, ...]] = ("Z", "0", "1", "X", "X", "X", "X", "X")
+_STRING_TABLE: Final[tuple[str, ...]] = ("Z", "0", "1", "X", "X", "X", "X", "X")
 
 
 @unique

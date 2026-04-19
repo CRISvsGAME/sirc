@@ -89,20 +89,12 @@ _STRING_TABLE: Final[tuple[str, ...]] = ("Z", "0", "1", "X", "X", "X", "X", "X")
 
 @unique
 class LogicValue(IntEnum):
-    """
-    Semantic wrapper for SIRC's four-state logic value domain.
+    """Semantic IntEnum wrapper for canonical resolved logic values."""
 
-    Values:
-        ZERO -> logical low
-        ONE  -> logical high
-        X    -> unknown or conflicting value
-        Z    -> undriven or high-impedance value
-    """
-
+    Z = Z
     ZERO = ZERO
     ONE = ONE
     X = X
-    Z = Z
 
     # --------------------------------------------------------------------------
     # Driver Resolution

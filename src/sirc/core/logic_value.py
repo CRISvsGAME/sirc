@@ -97,48 +97,17 @@ class LogicValue(IntEnum):
     X = X
 
     # --------------------------------------------------------------------------
-    # Driver Resolution
+    # Resolution
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def resolve_all(values: Iterable[int]) -> LogicValue:
-        """
-        Resolve multiple logic masks into a single LogicValue.
-
-        The iterable is accumulated into a 3-bit driver-presence mask using
-        bitwise OR, which is then resolved through RESOLVE_TABLE.
-
-        Each value may represent either:
-            - A single LogicValue-compatible driver value
-            - A partially precomputed driver-presence mask
-
-        Args:
-            values: Iterable of valid mask-compatible logic integers.
-
-        Returns:
-            LogicValue: The resolved value, or Z if no values are provided.
-        """
+    def resolve(values: Iterable[int]) -> LogicValue:
+        """Resolve valid raw values or masks into a canonical LogicValue."""
         mask = Z
 
         for value in values:
             mask |= value
 
-        return LogicValue(RESOLVE_TABLE[mask])
-
-    @staticmethod
-    def resolve_mask(mask: int) -> LogicValue:
-        """
-        Resolve a precomputed 3-bit driver-presence mask.
-
-        The caller is responsible for providing a valid mask in the inclusive
-        range [0b000, 0b111].
-
-        Args:
-            mask: Integer mask in the inclusive range [0b000, 0b111].
-
-        Returns:
-            LogicValue: The resolved value.
-        """
         return LogicValue(RESOLVE_TABLE[mask])
 
     # --------------------------------------------------------------------------

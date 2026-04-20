@@ -63,8 +63,8 @@ Module contract
 ---------------
 
 API boundary:
-    resolve(values) accepts LogicValue members, resolved raw values, accumulated
-    masks, or any valid mix of these.
+    LogicValue.resolve(values) accepts LogicValue members, resolved raw values,
+    accumulated masks, or any valid mix of these.
 
 Execution contract:
     Core logic is unchecked.
@@ -102,7 +102,11 @@ class LogicValue(IntEnum):
 
     @staticmethod
     def resolve(values: Iterable[int]) -> LogicValue:
-        """Resolve valid raw values or masks into a canonical LogicValue."""
+        """
+        Resolve valid raw values or masks into a canonical LogicValue.
+
+        Empty input resolves to LogicValue.Z.
+        """
         mask = Z
 
         for value in values:
@@ -111,7 +115,7 @@ class LogicValue(IntEnum):
         return LogicValue(RESOLVE_TABLE[mask])
 
     # --------------------------------------------------------------------------
-    # Display Helpers
+    # Display helpers
     # --------------------------------------------------------------------------
 
     def __str__(self) -> str:

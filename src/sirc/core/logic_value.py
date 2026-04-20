@@ -115,8 +115,8 @@ class LogicValue(IntEnum):
     # --------------------------------------------------------------------------
 
     def __str__(self) -> str:
-        """Return compact string form ('0', '1', 'X', 'Z')."""
-        return STRING_TABLE[self]
+        """Return compact display symbol."""
+        return _STRING_TABLE[int(self)]
 
     def __repr__(self) -> str:
         """Return debug representation."""

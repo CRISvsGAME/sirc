@@ -1,19 +1,16 @@
 from enum import IntEnum
 from typing import Final, Iterable
 
+Z: Final[int]
 ZERO: Final[int]
 ONE: Final[int]
 X: Final[int]
-Z: Final[int]
 RESOLVE_TABLE: Final[tuple[int, ...]]
-STRING_TABLE: Final[tuple[str, ...]]
 
 class LogicValue(IntEnum):
-    ZERO = ZERO
-    ONE = ONE
-    X = X
-    Z = Z
+    Z = 0
+    ZERO = 1
+    ONE = 2
+    X = 4
     @staticmethod
-    def resolve_all(values: Iterable[int]) -> LogicValue: ...
-    @staticmethod
-    def resolve_mask(mask: int) -> LogicValue: ...
+    def resolve(values: Iterable[int]) -> LogicValue: ...

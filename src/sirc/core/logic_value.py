@@ -91,10 +91,10 @@ _STRING_TABLE: Final[tuple[str, ...]] = ("Z", "0", "1", "X", "X", "X", "X", "X")
 class LogicValue(IntEnum):
     """Semantic IntEnum wrapper for canonical resolved logic values."""
 
-    Z = Z
-    ZERO = ZERO
-    ONE = ONE
-    X = X
+    Z = 0b000
+    ZERO = 0b001
+    ONE = 0b010
+    X = 0b100
 
     # --------------------------------------------------------------------------
     # Resolution

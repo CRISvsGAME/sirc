@@ -1,81 +1,81 @@
 """Unit tests for LogicValue module."""
 
 import pytest
-from sirc.core import LogicValue, ZERO, ONE, X, Z, RESOLVE_TABLE
+from sirc.core import LogicValue, Z, ZERO, ONE, X, RESOLVE_TABLE
 
-MASKS = (0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111)
-RAW_VALUES = (Z, ZERO, ONE, X, X, X, X, X)
-LOGIC_VALUES = (
-    LogicValue.Z,
-    LogicValue.ZERO,
-    LogicValue.ONE,
-    LogicValue.X,
-    LogicValue.X,
-    LogicValue.X,
-    LogicValue.X,
-    LogicValue.X,
+MASK_CASES = (
+    (0b000, Z, LogicValue.Z),
+    (0b001, ZERO, LogicValue.ZERO),
+    (0b010, ONE, LogicValue.ONE),
+    (0b011, X, LogicValue.X),
+    (0b100, X, LogicValue.X),
+    (0b101, X, LogicValue.X),
+    (0b110, X, LogicValue.X),
+    (0b111, X, LogicValue.X),
 )
 
-# ------------------------------------------------------------------------------
-# Simulator Driver Resolution Tests
-# ------------------------------------------------------------------------------
+MASKS = tuple(mask for mask, _, _ in MASK_CASES)
+EXPECTED_RESOLVE_TABLE = (Z, ZERO, ONE, X, X, X, X, X)
 
 
-@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, RAW_VALUES)))
-def test_resolve_table(mask: int, expected: int):
-    """Test direct resolution of all valid driver masks."""
-    assert RESOLVE_TABLE[mask] == expected
+def test_resolve_table_contract() -> None:
+    """Test full raw resolution table contract."""
+    assert RESOLVE_TABLE == EXPECTED_RESOLVE_TABLE
 
 
-# ------------------------------------------------------------------------------
-# LogicValue Resolution Tests
-# ------------------------------------------------------------------------------
+def test_raw_logic_constants() -> None:
+    """Test canonical raw logic constants."""
+    assert Z == 0b000
+    assert ZERO == 0b001
+    assert ONE == 0b010
+    assert X == 0b100
 
 
-def test_resolve_all_empty_returns_z():
-    """Test that resolving an empty list returns Z."""
-    assert LogicValue.resolve_all([]) is LogicValue.Z
+def test_logic_value_members() -> None:
+    """Test LogicValue members match canonical raw values."""
+    assert LogicValue.Z == Z
+    assert LogicValue.ZERO == ZERO
+    assert LogicValue.ONE == ONE
+    assert LogicValue.X == X
 
 
-@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, LOGIC_VALUES)))
-def test_resolve_all(mask: int, expected: LogicValue):
-    """Test logic resolution of all valid driver masks."""
-    assert LogicValue.resolve_all([mask]) is expected
+@pytest.mark.parametrize(("mask", "expected_raw", "_"), MASK_CASES)
+def test_resolve_table(mask: int, expected_raw: int, _: LogicValue) -> None:
+    """Test raw mask resolution through RESOLVE_TABLE."""
+    assert RESOLVE_TABLE[mask] == expected_raw
 
 
-@pytest.mark.parametrize(("mask", "expected"), tuple(zip(MASKS, LOGIC_VALUES)))
-def test_resolve_mask(mask: int, expected: LogicValue):
-    """Test logic resolution of all valid driver masks."""
-    assert LogicValue.resolve_mask(mask) is expected
+def test_logic_value_resolve_empty_returns_z() -> None:
+    """Test empty semantic resolution."""
+    assert LogicValue.resolve([]) is LogicValue.Z
 
 
-# ------------------------------------------------------------------------------
-# Equivalence Tests
-# ------------------------------------------------------------------------------
+@pytest.mark.parametrize(("mask", "_", "expected_logic"), MASK_CASES)
+def test_logic_value_resolve_mask(
+    mask: int, _: int, expected_logic: LogicValue
+) -> None:
+    """Test semantic resolution of valid masks."""
+    assert LogicValue.resolve([mask]) is expected_logic
 
 
-@pytest.mark.parametrize("mask", MASKS)
-def test_simulator_equivalent_logic_value(mask: int):
-    """Test direct resolution is equivalent to logic resolution."""
-    assert RESOLVE_TABLE[mask] == LogicValue.resolve_mask(mask)
+@pytest.mark.parametrize("left", MASKS)
+@pytest.mark.parametrize("right", MASKS)
+def test_logic_value_resolve_mixed_masks(left: int, right: int) -> None:
+    """Test semantic resolution of mixed valid masks."""
+    assert LogicValue.resolve([left, right]) is LogicValue(RESOLVE_TABLE[left | right])
 
 
-# -----------------------------------------------------------------------------
-# Display Helpers Tests
-# -----------------------------------------------------------------------------
-
-
-def test_str():
-    """Test LogicValue string conversion."""
+def test_logic_value_str() -> None:
+    """Test compact display symbols."""
+    assert str(LogicValue.Z) == "Z"
     assert str(LogicValue.ZERO) == "0"
     assert str(LogicValue.ONE) == "1"
     assert str(LogicValue.X) == "X"
-    assert str(LogicValue.Z) == "Z"
 
 
-def test_repr():
-    """Test LogicValue debug representation."""
+def test_logic_value_repr() -> None:
+    """Test debug representations."""
+    assert repr(LogicValue.Z) == "LogicValue.Z"
     assert repr(LogicValue.ZERO) == "LogicValue.ZERO"
     assert repr(LogicValue.ONE) == "LogicValue.ONE"
     assert repr(LogicValue.X) == "LogicValue.X"
-    assert repr(LogicValue.Z) == "LogicValue.Z"

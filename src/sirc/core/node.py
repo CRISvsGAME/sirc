@@ -1,9 +1,67 @@
 """
 SIRC Core Node Module.
 
-Defines the Node class used by the SIRC simulation engine. Nodes represent
-logical connection points in the circuit. Connectivity between Nodes is owned
-and managed by the Simulator, which groups Nodes to resolve LogicValues.
+Node handle and node-kind representation primitives.
+
+Node-kind domain
+----------------
+
+Representation:
+    A node kind is one of the canonical raw node-kind integers:
+
+        BASE_NODE_KIND = 0
+        GATE_NODE_KIND = 1
+
+    NodeKind is the semantic IntEnum wrapper for canonical node kinds.
+
+Meaning:
+    BASE -> ordinary circuit connection node.
+    GATE -> transistor gate/control node.
+
+    Node-kind values classify simulator-owned node records for topology,
+    representation, serialization, and optional scheduling/caching.
+
+    Node-kind values do not define connectivity, ownership, or evaluation
+    behavior by themselves.
+
+Node handle domain
+------------------
+
+Representation:
+    A Node is a lightweight handle over a simulator-owned node record.
+
+        Node._state -> DeviceSimulatorState
+        Node.id_    -> dense node id
+
+    Runtime node data is stored in DeviceSimulatorState dense arrays:
+
+        node_kinds[id_]           -> raw node-kind integer
+        node_default_values[id_]  -> raw logic value
+        node_resolved_values[id_] -> raw logic value
+
+Meaning:
+    Node does not own simulation state, connectivity, drivers, or topology.
+
+    Node reads simulator-owned arrays by id_ and exposes semantic/debug views:
+
+        node.kind           -> NodeKind
+        node.default_value  -> LogicValue
+        node.resolved_value -> LogicValue
+
+Module contract
+---------------
+
+Execution contract:
+    Simulator hot paths use dense arrays, raw node ids, raw node-kind integers,
+    and raw logic values directly.
+
+    Node and NodeKind are representation/debug/serialization helpers.
+    They are not simulator hot-path objects.
+
+Ownership contract:
+    DeviceSimulatorState owns runtime node data.
+    DeviceSimulator owns creation, mutation, connectivity, and evaluation.
+    Node owns only a state reference and node id.
 """
 
 from __future__ import annotations

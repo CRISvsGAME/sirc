@@ -89,36 +89,36 @@ class NodeKind(IntEnum):
 
 class Node:
     """
-    A Node is a lightweight public handle for a simulator-owned node.
+    Lightweight handle over a simulator-owned node record.
 
-    Node does not own simulation state. Runtime values are stored in
-    DeviceSimulatorState dense arrays and read through this object's id_.
+    Node owns only a state reference and dense node id.
+    Runtime node data is stored in DeviceSimulatorState arrays.
     """
 
     __slots__ = ("_state", "id_")
 
     def __init__(self, state: DeviceSimulatorState, node_id: int) -> None:
-        """Create a Node handle bound to simulator state."""
+        """Create a Node handle."""
         self._state: DeviceSimulatorState = state
         self.id_: int = node_id
 
     @property
     def kind(self) -> NodeKind:
-        """Return the NodeKind of this Node."""
+        """Return semantic node kind."""
         return NodeKind(self._state.node_kinds[self.id_])
 
     @property
     def default_value(self) -> LogicValue:
-        """Return the default LogicValue of this Node."""
+        """Return semantic default logic value."""
         return LogicValue(self._state.node_default_values[self.id_])
 
     @property
     def resolved_value(self) -> LogicValue:
-        """Return the resolved LogicValue of this Node."""
+        """Return semantic resolved logic value."""
         return LogicValue(self._state.node_resolved_values[self.id_])
 
     # --------------------------------------------------------------------------
-    # Debug Representation
+    # Debug representation
     # --------------------------------------------------------------------------
 
     def __repr__(self) -> str:

@@ -77,13 +77,13 @@ GATE_NODE_KIND: Final[int] = 1
 
 
 class NodeKind(IntEnum):
-    """Node Kind"""
+    """Semantic IntEnum wrapper for canonical node kinds."""
 
     BASE = BASE_NODE_KIND
     GATE = GATE_NODE_KIND
 
     def __repr__(self) -> str:
-        """Return readable debug representation."""
+        """Return debug representation."""
         return f"NodeKind.{self.name}"
 
 

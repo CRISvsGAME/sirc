@@ -1,13 +1,74 @@
 """
 SIRC Core Device Module.
 
-Defines LogicDevice, a lightweight public handle for simulator-owned
-single-terminal devices.
+LogicDevice handle and device-kind representation primitives.
 
-A LogicDevice is associated with exactly one terminal Node. The device kind
-defines whether it represents GND, VDD, Input, Probe, or Port. LogicDevice does
-not own simulation state; runtime data is stored in DeviceSimulatorState dense
-arrays and read through this object's id_.
+Device-kind domain
+------------------
+
+Representation:
+    A device kind is one of the canonical raw device-kind integers:
+
+        GND_DEVICE_KIND   = 0
+        VDD_DEVICE_KIND   = 1
+        INPUT_DEVICE_KIND = 2
+        PROBE_DEVICE_KIND = 3
+        PORT_DEVICE_KIND  = 4
+
+    LogicDeviceKind is the semantic IntEnum wrapper for canonical device kinds.
+
+Meaning:
+    GND   -> constant ZERO driver.
+    VDD   -> constant ONE driver.
+    INPUT -> externally mutable driver.
+    PROBE -> observation terminal.
+    PORT  -> reusable circuit/module boundary terminal.
+
+    Device-kind values classify simulator-owned device records for topology,
+    representation, serialization, and optional higher-level circuit assembly.
+
+    Device-kind values do not define ownership, connectivity, or propagation
+    behavior by themselves.
+
+LogicDevice handle domain
+-------------------------
+
+Representation:
+    A LogicDevice is a lightweight handle over a simulator-owned single-terminal
+    device record.
+
+        LogicDevice._state -> DeviceSimulatorState
+        LogicDevice.id_    -> dense device id
+
+    Runtime device data is stored in DeviceSimulatorState dense arrays:
+
+        device_kinds[id_] -> raw device-kind integer
+        device_nodes[id_] -> terminal node id
+
+Meaning:
+    LogicDevice does not own simulation state, connectivity, drivers, or
+    propagation.
+
+    LogicDevice reads simulator-owned arrays by id_ and exposes semantic/debug
+    views:
+
+        device.kind -> LogicDeviceKind
+        device.node -> Node
+
+Module contract
+---------------
+
+Execution contract:
+    Simulator hot paths use dense arrays, raw device ids, raw device-kind
+    integers, raw node ids, and raw logic values directly.
+
+    LogicDevice and LogicDeviceKind are representation/debug/serialization
+    helpers. They are not simulator hot-path objects.
+
+Ownership contract:
+    DeviceSimulatorState owns runtime device data.
+    DeviceSimulator owns creation, mutation, connectivity, and propagation.
+    LogicDevice owns only a state reference and device id.
 """
 
 from __future__ import annotations

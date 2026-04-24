@@ -87,7 +87,7 @@ PORT_DEVICE_KIND: Final[int] = 4
 
 
 class LogicDeviceKind(IntEnum):
-    """Logic Device Kind"""
+    """Semantic IntEnum wrapper for canonical device kinds."""
 
     GND = GND_DEVICE_KIND
     VDD = VDD_DEVICE_KIND
@@ -96,7 +96,7 @@ class LogicDeviceKind(IntEnum):
     PORT = PORT_DEVICE_KIND
 
     def __repr__(self) -> str:
-        """Return readable debug representation."""
+        """Return debug representation."""
         return f"LogicDeviceKind.{self.name}"
 
 
